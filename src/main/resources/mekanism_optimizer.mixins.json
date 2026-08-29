@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.mekanismoptimizer.mixin",
+  "plugin": "com.mekanismoptimizer.mixin.MekanismOptimizerMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "mekanism_optimizer.refmap.json",
+  "mixins": [
+    "InventoryNetworkMixin",
+    "TransporterManagerMixin",
+    "TransporterPathfinderMixin",
+    "StatUtilsMixin",
+    "TileComponentEjectorMixin",
+    "TileEntitySolarNeutronActivatorMixin",
+    "TileEntityElectricPumpMixin",
+    "EnergyNetworkMixin",
+    "FluidNetworkMixin",
+    "BoxedChemicalNetworkMixin",
+    "TileComponentChunkLoaderMixin",
+    "TileEntityDimensionalStabilizerMixin",
+    "TileEntityFactoryMixin",
+    "addons.EvolvedLunarActivatorMixin"
+  ],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
