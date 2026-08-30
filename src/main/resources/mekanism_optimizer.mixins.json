@@ -19,6 +19,7 @@
     "TileComponentChunkLoaderMixin",
     "TileEntityDimensionalStabilizerMixin",
     "TileEntityFactoryMixin",
+    "MultiblockDataMixin",
     "addons.EvolvedLunarActivatorMixin"
   ],
   "client": [],

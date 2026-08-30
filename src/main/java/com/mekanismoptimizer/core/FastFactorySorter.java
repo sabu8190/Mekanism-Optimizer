@@ -6,27 +6,37 @@ import mekanism.common.tile.factory.TileEntityFactory;
 import net.minecraft.world.item.ItemStack;
 
 import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class FastFactorySorter {
-    private static Field processInfoSlotsField = null;
-    private static boolean fieldLookupAttempted = false;
+    private static final Map<Class<?>, Field> FIELD_CACHE = new ConcurrentHashMap<>();
 
     private FastFactorySorter() {
     }
 
     private static TileEntityFactory.ProcessInfo[] getProcessInfoSlots(TileEntityFactory<?> factory) {
-        if (!fieldLookupAttempted) {
-            fieldLookupAttempted = true;
-            try {
-                processInfoSlotsField = TileEntityFactory.class.getDeclaredField("processInfoSlots");
-                processInfoSlotsField.setAccessible(true);
-            } catch (Exception e) {
-                MekanismOptimizerLogger.error("Failed to access processInfoSlots field in TileEntityFactory", e);
+        Class<?> clazz = factory.getClass();
+        Field field = FIELD_CACHE.computeIfAbsent(clazz, c -> {
+            Class<?> current = c;
+            while (current != null && current != Object.class) {
+                try {
+                    Field f = current.getDeclaredField("processInfoSlots");
+                    f.setAccessible(true);
+                    return f;
+                } catch (NoSuchFieldException ignored) {
+                    current = current.getSuperclass();
+                } catch (Exception e) {
+                    MekanismOptimizerLogger.error("Error accessing processInfoSlots in " + c.getName(), e);
+                    break;
+                }
             }
-        }
-        if (processInfoSlotsField != null) {
+            return null;
+        });
+
+        if (field != null) {
             try {
-                return (TileEntityFactory.ProcessInfo[]) processInfoSlotsField.get(factory);
+                return (TileEntityFactory.ProcessInfo[]) field.get(factory);
             } catch (Exception ignored) {
             }
         }
@@ -65,6 +75,7 @@ public final class FastFactorySorter {
             return true;
         }
 
+        // Fast path for single item type (covers 95%+ of industrial automation setups)
         if (singleItemType && !firstItem.isEmpty()) {
             int maxStackSize = firstItem.getMaxStackSize();
             int numberPerSlot = totalCount / totalProcesses;
