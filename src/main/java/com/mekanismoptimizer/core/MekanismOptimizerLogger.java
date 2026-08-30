@@ -19,6 +19,8 @@ public final class MekanismOptimizerLogger {
     private static final AtomicLong MULTITHREAD_TASKS = new AtomicLong(0);
     private static final AtomicLong FACTORY_SORT_OPTIMIZED = new AtomicLong(0);
     private static final AtomicLong MULTIBLOCK_TICKS_OPTIMIZED = new AtomicLong(0);
+    private static final AtomicLong RADIATION_CHECKS_SAVED = new AtomicLong(0);
+    private static final AtomicLong CABLE_BACKOFF_SKIPPED = new AtomicLong(0);
 
     private static long lastLogTime = System.currentTimeMillis();
 
@@ -57,9 +59,11 @@ public final class MekanismOptimizerLogger {
     public static void recordMultithreadTask() { MULTITHREAD_TASKS.incrementAndGet(); }
     public static void recordFactorySortOptimized() { FACTORY_SORT_OPTIMIZED.incrementAndGet(); }
     public static void recordMultiblockOptimized() { MULTIBLOCK_TICKS_OPTIMIZED.incrementAndGet(); }
+    public static void recordRadiationCheckSaved() { RADIATION_CHECKS_SAVED.incrementAndGet(); }
+    public static void recordCableBackoffSkipped() { CABLE_BACKOFF_SKIPPED.incrementAndGet(); }
 
     public static String getMetricsSummary() {
-        return String.format("[MekanismOptimizer Stats] Pipe Sim: %d | Backoff: %d | Poisson O(1): %d | Solar: %d | Pump: %d | Net Emits: %d | Packets: %d | Chunkloads: %d | Multithread: %d | Factory Sort: %d | Multiblock: %d",
+        return String.format("[MekanismOptimizer Stats] Pipe: %d | Backoff: %d | Poisson: %d | Solar: %d | Pump: %d | Net: %d | Packets: %d | Chunk: %d | Multi: %d | Factory: %d | MultiBlock: %d | Radiation: %d | Cable: %d",
                 PIPE_SIM_AVOIDED.get(),
                 BACKOFF_TICKS_SKIPPED.get(),
                 POISSON_O1_SAMPLES.get(),
@@ -70,7 +74,9 @@ public final class MekanismOptimizerLogger {
                 CHUNKLOAD_SKIPS.get(),
                 MULTITHREAD_TASKS.get(),
                 FACTORY_SORT_OPTIMIZED.get(),
-                MULTIBLOCK_TICKS_OPTIMIZED.get());
+                MULTIBLOCK_TICKS_OPTIMIZED.get(),
+                RADIATION_CHECKS_SAVED.get(),
+                CABLE_BACKOFF_SKIPPED.get());
     }
 
     public static void checkAndLogStats() {

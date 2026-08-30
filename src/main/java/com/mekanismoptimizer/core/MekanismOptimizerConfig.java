@@ -23,6 +23,8 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_FACTORY_AUTO_SORT_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_MULTIBLOCK_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_ADDON_OPTIMIZATIONS;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_RADIATION_FAST_PATH;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_CABLE_BACKOFF;
 
     public static final ForgeConfigSpec.IntValue MAX_BACKOFF_TICKS;
     public static final ForgeConfigSpec.IntValue ADAPTIVE_BACKOFF_MAX_TICKS;
@@ -91,6 +93,14 @@ public final class MekanismOptimizerConfig {
         ENABLE_ADDON_OPTIMIZATIONS = builder
                 .comment("Enable special performance optimizations for Mekanism Addons (Astral Mekanism, Evolved Mekanism, Mekanism Extras).")
                 .define("enableAddonOptimizations", true);
+
+        ENABLE_RADIATION_FAST_PATH = builder
+                .comment("Enable O(1) instant bypass for living entity radiation calculations when world has no active radiation.")
+                .define("enableRadiationFastPath", true);
+
+        ENABLE_CABLE_BACKOFF = builder
+                .comment("Enable adaptive backoff for universal cables and energy cubes when targets are fully charged.")
+                .define("enableCableBackoff", true);
 
         MAX_BACKOFF_TICKS = builder
                 .comment("Maximum ticks to back off when an ejection target is continuously blocked.")

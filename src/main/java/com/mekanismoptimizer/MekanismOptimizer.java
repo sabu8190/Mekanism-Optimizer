@@ -32,6 +32,7 @@ public class MekanismOptimizer {
     public void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             currentServerTick++;
+            com.mekanismoptimizer.core.AdaptiveBackoffManager.onServerTick();
 
             // Flush coalesced packets to clients safely at tick boundary
             PacketCoalescer.flushPendingUpdates();

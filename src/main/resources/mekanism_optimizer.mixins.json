@@ -20,6 +20,8 @@
     "TileEntityDimensionalStabilizerMixin",
     "TileEntityFactoryMixin",
     "MultiblockDataMixin",
+    "RadiationManagerMixin",
+    "CableUtilsMixin",
     "addons.EvolvedLunarActivatorMixin"
   ],
   "client": [],

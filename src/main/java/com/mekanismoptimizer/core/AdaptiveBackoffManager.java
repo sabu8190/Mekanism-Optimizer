@@ -4,17 +4,22 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.core.BlockPos;
 
 /**
- * Adaptive Exponential Backoff Manager for Mekanism logistical pipes and transporters.
- * Suppresses high-frequency tick polling for obstructed, full, or failing inventory interactions.
+ * Adaptive Exponential Backoff Manager for Mekanism logistical pipes, transporters, and power cables.
+ * Suppresses high-frequency tick polling for obstructed, full, or failing inventory/energy interactions.
  * Wakes up automatically when maximum backoff expires or upon block update notification.
  */
 public class AdaptiveBackoffManager {
     private static final Object2LongOpenHashMap<Object> NEXT_ALLOWED_TICK = new Object2LongOpenHashMap<>();
     private static final Object2LongOpenHashMap<Object> CURRENT_BACKOFF = new Object2LongOpenHashMap<>();
+    private static long currentGlobalTick = 0L;
 
     static {
         NEXT_ALLOWED_TICK.defaultReturnValue(0L);
         CURRENT_BACKOFF.defaultReturnValue(1L);
+    }
+
+    public static synchronized void onServerTick() {
+        currentGlobalTick++;
     }
 
     public static synchronized boolean shouldRun(Object key, long currentTick) {
@@ -24,6 +29,22 @@ public class AdaptiveBackoffManager {
             return false;
         }
         return true;
+    }
+
+    public static synchronized boolean shouldBackoff(Object key) {
+        long nextTick = NEXT_ALLOWED_TICK.getLong(key);
+        if (currentGlobalTick < nextTick) {
+            return true;
+        }
+        return false;
+    }
+
+    public static synchronized void recordFailure(Object key) {
+        recordFailure(key, currentGlobalTick);
+    }
+
+    public static synchronized void reset(Object key) {
+        recordSuccess(key);
     }
 
     public static synchronized void recordFailure(Object key, long currentTick) {
@@ -48,11 +69,16 @@ public class AdaptiveBackoffManager {
     }
 
     public static synchronized void wakeUp(Object key) {
-        CURRENT_BACKOFF.remove(key);
-        NEXT_ALLOWED_TICK.remove(key);
+        recordSuccess(key);
     }
 
-    public static synchronized void wakeUpPos(BlockPos pos) {
-        wakeUp(pos);
+    public static synchronized void notifyBlockUpdate(BlockPos pos) {
+        CURRENT_BACKOFF.remove(pos);
+        NEXT_ALLOWED_TICK.remove(pos);
+    }
+
+    public static synchronized void clear() {
+        CURRENT_BACKOFF.clear();
+        NEXT_ALLOWED_TICK.clear();
     }
 }
