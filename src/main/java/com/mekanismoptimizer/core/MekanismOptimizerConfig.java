@@ -27,6 +27,12 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_CABLE_BACKOFF;
     public static final ForgeConfigSpec.BooleanValue ENABLE_LOOKING_AT_CACHE;
 
+    // Auto-Eject Rate & 2.1B Bypass Settings
+    public static final ForgeConfigSpec.BooleanValue ENABLE_UNLIMITED_AUTO_EJECT;
+    public static final ForgeConfigSpec.IntValue AUTO_EJECT_BURST_MULTIPLIER;
+    public static final ForgeConfigSpec.IntValue ITEM_EJECT_TICK_DELAY;
+    public static final ForgeConfigSpec.IntValue ITEM_EJECT_MAX_STACKS_PER_TICK;
+
     public static final ForgeConfigSpec.IntValue MAX_BACKOFF_TICKS;
     public static final ForgeConfigSpec.IntValue ADAPTIVE_BACKOFF_MAX_TICKS;
     public static final ForgeConfigSpec.IntValue SOLAR_LIGHT_CACHE_TTL_TICKS;
@@ -106,6 +112,30 @@ public final class MekanismOptimizerConfig {
         ENABLE_LOOKING_AT_CACHE = builder
                 .comment("Enable unit display and HUD tooltip formatting cache to eliminate repeated string allocations.")
                 .define("enableLookingAtCache", true);
+
+        builder.pop();
+
+        builder.comment("Auto-Eject & Transfer Rate Tuning").push("Auto-Eject Tuning");
+
+        ENABLE_UNLIMITED_AUTO_EJECT = builder
+                .comment("Enable multi-burst auto-eject to bypass the 2.14 billion (Integer.MAX_VALUE) limit per tick.")
+                .define("enableUnlimitedAutoEject", true);
+
+        AUTO_EJECT_BURST_MULTIPLIER = builder
+                .comment("Maximum burst ejection iterations per tick for fluids, gases, and energy (e.g. 64 = up to 64x standard rate per tick).")
+                .defineInRange("autoEjectBurstMultiplier", 64, 1, 1024);
+
+        ITEM_EJECT_TICK_DELAY = builder
+                .comment("Tick delay between item auto-ejection cycles (0 = eject every tick, vanilla Mekanism default is 10).")
+                .defineInRange("itemEjectTickDelay", 0, 0, 20);
+
+        ITEM_EJECT_MAX_STACKS_PER_TICK = builder
+                .comment("Maximum item stacks to eject in a single tick (e.g. 64 stacks/tick).")
+                .defineInRange("itemEjectMaxStacksPerTick", 64, 1, 512);
+
+        builder.pop();
+
+        builder.comment("Advanced Tuning").push("Advanced Tuning");
 
         MAX_BACKOFF_TICKS = builder
                 .comment("Maximum ticks to back off when an ejection target is continuously blocked.")
