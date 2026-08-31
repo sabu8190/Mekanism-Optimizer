@@ -24,6 +24,7 @@
     "CableUtilsMixin",
     "UnitDisplayUtilsMixin",
     "WorldUtilsMixin",
+    "BasicFluidTankMixin",
     "generators.TileEntitySolarGeneratorMixin",
     "generators.TileEntityWindGeneratorMixin",
     "generators.TileEntityGeneratorMixin",
