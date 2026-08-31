@@ -23,6 +23,7 @@
     "RadiationManagerMixin",
     "CableUtilsMixin",
     "UnitDisplayUtilsMixin",
+    "WorldUtilsMixin",
     "generators.TileEntitySolarGeneratorMixin",
     "generators.TileEntityWindGeneratorMixin",
     "generators.TileEntityGeneratorMixin",

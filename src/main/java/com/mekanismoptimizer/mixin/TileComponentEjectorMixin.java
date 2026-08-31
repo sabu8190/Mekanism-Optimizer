@@ -59,12 +59,11 @@ public abstract class TileComponentEjectorMixin {
             return;
         }
 
-        // Apply custom tick delay for items if configured
         if (tickDelay > MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get()) {
             tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
         }
 
-        // Multi-burst ejection engine (bypasses 2.1B / 1-stack per tick bottlenecks)
+        // Multi-burst ejection engine
         if (MekanismOptimizerConfig.ENABLE_UNLIMITED_AUTO_EJECT.get() && !mekanismOptimizer$IS_BURSTING.get()) {
             int burstMultiplier = MekanismOptimizerConfig.AUTO_EJECT_BURST_MULTIPLIER.get();
             int itemMaxStacks = MekanismOptimizerConfig.ITEM_EJECT_MAX_STACKS_PER_TICK.get();
@@ -96,7 +95,6 @@ public abstract class TileComponentEjectorMixin {
 
     @Inject(method = "outputItems", at = @At("RETURN"))
     private void onOutputItemsReturn(ConfigInfo info, CallbackInfo ci) {
-        // Set user-configured item delay instead of hardcoded 10 ticks
         this.tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
     }
 }
