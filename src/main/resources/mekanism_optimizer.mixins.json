@@ -23,6 +23,9 @@
     "RadiationManagerMixin",
     "CableUtilsMixin",
     "UnitDisplayUtilsMixin",
+    "generators.TileEntitySolarGeneratorMixin",
+    "generators.TileEntityWindGeneratorMixin",
+    "generators.TileEntityGeneratorMixin",
     "addons.EvolvedLunarActivatorMixin"
   ],
   "client": [],
