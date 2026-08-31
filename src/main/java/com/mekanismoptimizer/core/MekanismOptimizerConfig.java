@@ -27,6 +27,9 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_CABLE_BACKOFF;
     public static final ForgeConfigSpec.BooleanValue ENABLE_LOOKING_AT_CACHE;
 
+    // Dedicated File Logger
+    public static final ForgeConfigSpec.BooleanValue ENABLE_DEDICATED_LOG_FILE;
+
     // Auto-Eject Rate & 2.1B Bypass Settings
     public static final ForgeConfigSpec.BooleanValue ENABLE_UNLIMITED_AUTO_EJECT;
     public static final ForgeConfigSpec.IntValue AUTO_EJECT_BURST_MULTIPLIER;
@@ -128,6 +131,11 @@ public final class MekanismOptimizerConfig {
                 .comment("Enable unit display and HUD tooltip formatting cache to eliminate repeated string allocations.")
                 .translation("mekanism_optimizer.config.enableLookingAtCache")
                 .define("enableLookingAtCache", true);
+
+        ENABLE_DEDICATED_LOG_FILE = builder
+                .comment("Enable writing dedicated optimization and performance logs to logs/mekanism_optimizer.log.")
+                .translation("mekanism_optimizer.config.enableDedicatedLogFile")
+                .define("enableDedicatedLogFile", true);
 
         builder.pop();
 

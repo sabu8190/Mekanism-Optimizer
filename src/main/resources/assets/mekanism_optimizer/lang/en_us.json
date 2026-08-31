@@ -46,5 +46,7 @@
   "mekanism_optimizer.config.dynamicNetworkCooldownTicks": "Dynamic Network Cooldown Ticks",
   "mekanism_optimizer.config.dynamicNetworkCooldownTicks.tooltip": "Cooldown ticks before re-checking stalled networks.",
   "mekanism_optimizer.config.logIntervalSeconds": "Log Interval Seconds",
-  "mekanism_optimizer.config.logIntervalSeconds.tooltip": "Interval in seconds for performance statistics logging (0 to disable)."
+  "mekanism_optimizer.config.logIntervalSeconds.tooltip": "Interval in seconds for performance statistics logging (0 to disable).",
+  "mekanism_optimizer.config.enableDedicatedLogFile": "Enable Dedicated Log File",
+  "mekanism_optimizer.config.enableDedicatedLogFile.tooltip": "Writes dedicated optimization statistics and performance metrics to logs/mekanism_optimizer.log."
 }

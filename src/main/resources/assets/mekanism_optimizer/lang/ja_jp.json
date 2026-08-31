@@ -46,5 +46,7 @@
   "mekanism_optimizer.config.dynamicNetworkCooldownTicks": "ネットワーククールダウンTick数",
   "mekanism_optimizer.config.dynamicNetworkCooldownTicks.tooltip": "停滞ネットワークの再チェック待機Tick数を設定します。",
   "mekanism_optimizer.config.logIntervalSeconds": "統計ログ出力間隔(秒)",
-  "mekanism_optimizer.config.logIntervalSeconds.tooltip": "パフォーマンス最適化統計ログをサーバーログに出力する間隔を設定します(0で無効)。"
+  "mekanism_optimizer.config.logIntervalSeconds.tooltip": "パフォーマンス最適化統計ログをサーバーログに出力する間隔を設定します(0で無効)。",
+  "mekanism_optimizer.config.enableDedicatedLogFile": "専用ログファイル出力 (logs/mekanism_optimizer.log)",
+  "mekanism_optimizer.config.enableDedicatedLogFile.tooltip": "最適化統計、バースト搬出、パフォーマンスメトリクスを専用ログファイル logs/mekanism_optimizer.log に非同期出力します。"
 }
