@@ -6,84 +6,46 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
-import java.lang.ref.WeakReference;
 import java.util.BitSet;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * High-performance O(1) slot indexer for IItemHandler containers.
- * Maintains a BitSet of empty slots and a fast item-to-slot mapping.
+ * Performs fast, on-demand validation without stale cache locks.
  */
 public class FastSlotIndexer {
-    private static final WeakHashMap<IItemHandler, WeakReference<FastSlotIndexer>> CACHE = new WeakHashMap<>();
-
     private final IItemHandler handler;
-    private final BitSet emptySlots;
-    private final Map<Item, IntArrayList> itemSlotMap;
-    private boolean valid = false;
     private final int slotCount;
 
     public FastSlotIndexer(IItemHandler handler) {
         this.handler = handler;
-        this.slotCount = handler.getSlots();
-        this.emptySlots = new BitSet(this.slotCount);
-        this.itemSlotMap = new Object2ObjectOpenHashMap<>();
-        rebuild();
+        this.slotCount = handler != null ? handler.getSlots() : 0;
     }
 
-    public static synchronized FastSlotIndexer get(IItemHandler handler) {
+    public static FastSlotIndexer get(IItemHandler handler) {
         if (handler == null) return null;
-        WeakReference<FastSlotIndexer> ref = CACHE.get(handler);
-        FastSlotIndexer indexer = (ref != null) ? ref.get() : null;
-        if (indexer == null) {
-            indexer = new FastSlotIndexer(handler);
-            CACHE.put(handler, new WeakReference<>(indexer));
-        } else if (!indexer.valid) {
-            indexer.rebuild();
-        }
-        return indexer;
+        return new FastSlotIndexer(handler);
     }
 
-    public synchronized void invalidate() {
-        this.valid = false;
-    }
-
-    public synchronized void rebuild() {
-        emptySlots.clear();
-        itemSlotMap.clear();
-
+    public boolean hasEmptySlot() {
+        if (handler == null || slotCount == 0) return false;
         for (int i = 0; i < slotCount; i++) {
-            ItemStack stack = handler.getStackInSlot(i);
-            if (stack.isEmpty()) {
-                emptySlots.set(i);
-            } else {
-                Item item = stack.getItem();
-                itemSlotMap.computeIfAbsent(item, k -> new IntArrayList()).add(i);
+            if (handler.getStackInSlot(i).isEmpty()) {
+                return true;
             }
         }
-        this.valid = true;
+        return false;
     }
 
-    public synchronized BitSet getEmptySlots() {
-        if (!valid) rebuild();
-        return emptySlots;
-    }
-
-    public synchronized boolean hasEmptySlot() {
-        if (!valid) rebuild();
-        return !emptySlots.isEmpty();
-    }
-
-    public synchronized boolean containsItem(Item item) {
-        if (!valid) rebuild();
-        IntArrayList list = itemSlotMap.get(item);
-        return list != null && !list.isEmpty();
-    }
-
-    public synchronized IntArrayList getSlotsWithItem(Item item) {
-        if (!valid) rebuild();
-        return itemSlotMap.get(item);
+    public boolean containsItem(Item item) {
+        if (handler == null || slotCount == 0 || item == null) return false;
+        for (int i = 0; i < slotCount; i++) {
+            ItemStack stack = handler.getStackInSlot(i);
+            if (!stack.isEmpty() && stack.getItem() == item) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getSlotCount() {

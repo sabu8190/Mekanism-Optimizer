@@ -25,6 +25,7 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_ADDON_OPTIMIZATIONS;
     public static final ForgeConfigSpec.BooleanValue ENABLE_RADIATION_FAST_PATH;
     public static final ForgeConfigSpec.BooleanValue ENABLE_CABLE_BACKOFF;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_LOOKING_AT_CACHE;
 
     public static final ForgeConfigSpec.IntValue MAX_BACKOFF_TICKS;
     public static final ForgeConfigSpec.IntValue ADAPTIVE_BACKOFF_MAX_TICKS;
@@ -101,6 +102,10 @@ public final class MekanismOptimizerConfig {
         ENABLE_CABLE_BACKOFF = builder
                 .comment("Enable adaptive backoff for universal cables and energy cubes when targets are fully charged.")
                 .define("enableCableBackoff", true);
+
+        ENABLE_LOOKING_AT_CACHE = builder
+                .comment("Enable unit display and HUD tooltip formatting cache to eliminate repeated string allocations.")
+                .define("enableLookingAtCache", true);
 
         MAX_BACKOFF_TICKS = builder
                 .comment("Maximum ticks to back off when an ejection target is continuously blocked.")

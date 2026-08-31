@@ -21,6 +21,7 @@ public final class MekanismOptimizerLogger {
     private static final AtomicLong MULTIBLOCK_TICKS_OPTIMIZED = new AtomicLong(0);
     private static final AtomicLong RADIATION_CHECKS_SAVED = new AtomicLong(0);
     private static final AtomicLong CABLE_BACKOFF_SKIPPED = new AtomicLong(0);
+    private static final AtomicLong UNIT_DISPLAY_CACHED = new AtomicLong(0);
 
     private static long lastLogTime = System.currentTimeMillis();
 
@@ -61,9 +62,10 @@ public final class MekanismOptimizerLogger {
     public static void recordMultiblockOptimized() { MULTIBLOCK_TICKS_OPTIMIZED.incrementAndGet(); }
     public static void recordRadiationCheckSaved() { RADIATION_CHECKS_SAVED.incrementAndGet(); }
     public static void recordCableBackoffSkipped() { CABLE_BACKOFF_SKIPPED.incrementAndGet(); }
+    public static void recordUnitDisplayCached() { UNIT_DISPLAY_CACHED.incrementAndGet(); }
 
     public static String getMetricsSummary() {
-        return String.format("[MekanismOptimizer Stats] Pipe: %d | Backoff: %d | Poisson: %d | Solar: %d | Pump: %d | Net: %d | Packets: %d | Chunk: %d | Multi: %d | Factory: %d | MultiBlock: %d | Radiation: %d | Cable: %d",
+        return String.format("[MekanismOptimizer Stats] Pipe: %d | Backoff: %d | Poisson: %d | Solar: %d | Pump: %d | Net: %d | Packets: %d | Chunk: %d | Multi: %d | Factory: %d | MultiBlock: %d | Radiation: %d | Cable: %d | UnitDisplay: %d",
                 PIPE_SIM_AVOIDED.get(),
                 BACKOFF_TICKS_SKIPPED.get(),
                 POISSON_O1_SAMPLES.get(),
@@ -76,7 +78,8 @@ public final class MekanismOptimizerLogger {
                 FACTORY_SORT_OPTIMIZED.get(),
                 MULTIBLOCK_TICKS_OPTIMIZED.get(),
                 RADIATION_CHECKS_SAVED.get(),
-                CABLE_BACKOFF_SKIPPED.get());
+                CABLE_BACKOFF_SKIPPED.get(),
+                UNIT_DISPLAY_CACHED.get());
     }
 
     public static void checkAndLogStats() {
