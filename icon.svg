@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181c24"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+
+    <!-- Mekanism Cyan / Green Glow -->
+    <linearGradient id="mekGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffcc"/>
+      <stop offset="50%" stop-color="#00d2ff"/>
+      <stop offset="100%" stop-color="#00a86b"/>
+    </linearGradient>
+
+    <!-- Speed Lightning Yellow / Orange -->
+    <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff066"/>
+      <stop offset="100%" stop-color="#ff9900"/>
+    </linearGradient>
+
+    <!-- Steel Chassis Gradient -->
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3a4454"/>
+      <stop offset="100%" stop-color="#222834"/>
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Rounded Square Container -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="url(#bgGrad)" stroke="#2b384e" stroke-width="8"/>
+
+  <!-- Industrial Steel Border Ring -->
+  <rect x="36" y="36" width="440" height="440" rx="80" fill="none" stroke="url(#steelGrad)" stroke-width="12" opacity="0.8"/>
+
+  <!-- Minecraft / Mekanism Circuit Pattern Grid -->
+  <path d="M 80,120 L 160,120 L 160,80 M 352,80 L 352,120 L 432,120 M 80,392 L 160,392 L 160,432 M 352,432 L 352,392 L 432,392" 
+        stroke="#00ffcc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+  
+  <!-- Corner Tech Nodes -->
+  <circle cx="80" cy="80" r="10" fill="#00ffcc" opacity="0.8" filter="url(#glow)"/>
+  <circle cx="432" cy="80" r="10" fill="#00ffcc" opacity="0.8" filter="url(#glow)"/>
+  <circle cx="80" cy="432" r="10" fill="#00ffcc" opacity="0.8" filter="url(#glow)"/>
+  <circle cx="432" cy="432" r="10" fill="#00ffcc" opacity="0.8" filter="url(#glow)"/>
+
+  <!-- Central Hexagonal Energy Core -->
+  <polygon points="256,90 380,160 380,300 256,370 132,300 132,160" 
+           fill="#121820" stroke="#00ffcc" stroke-width="10" stroke-linejoin="round" filter="url(#glow)"/>
+
+  <!-- Inner Hexagon Ring -->
+  <polygon points="256,115 355,173 355,287 256,345 157,287 157,173" 
+           fill="#1a2330" stroke="#00a86b" stroke-width="4" opacity="0.6"/>
+
+  <!-- Stylized Iconic "M" for Mekanism in Center -->
+  <path d="M 175,310 L 175,175 L 256,250 L 337,175 L 337,310 L 295,310 L 295,235 L 256,275 L 217,235 L 217,310 Z" 
+        fill="url(#mekGlow)" filter="url(#glow)"/>
+
+  <!-- Dynamic Optimization Lightning Bolt Slicing Through -->
+  <polygon points="275,70 215,225 265,225 235,380 330,195 280,195" 
+           fill="url(#speedGrad)" filter="url(#glow)"/>
+
+  <!-- "OPTIMIZER" Subtitle Badge at Bottom -->
+  <rect x="126" y="400" width="260" height="52" rx="26" fill="#0f1722" stroke="#00ffcc" stroke-width="4"/>
+  <text x="256" y="436" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-weight="900" font-size="24" 
+        fill="#ffffff" text-anchor="middle" letter-spacing="4">OPTIMIZER</text>
+</svg>
