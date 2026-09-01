@@ -19,6 +19,7 @@
     "TileComponentChunkLoaderMixin",
     "TileEntityDimensionalStabilizerMixin",
     "TileEntityFactoryMixin",
+    "TileEntityElectricMachineMixin",
     "MultiblockDataMixin",
     "RadiationManagerMixin",
     "CableUtilsMixin",
