@@ -19,9 +19,8 @@ public abstract class BoxedChemicalNetworkMixin {
         if (!MekanismOptimizerConfig.ENABLE_NETWORK_EMIT_OPTIMIZATION.get()) {
             return;
         }
-        BoxedChemicalNetwork self = (BoxedChemicalNetwork) (Object) this;
-        if (self.getAcceptorCount() == 0 || stack == null || stack.isEmpty()) {
-            MekanismOptimizerLogger.recordNetworkEmitSkipped();
+        // Safely skip only when stack is completely null or empty to prevent blocking AME addon machines
+        if (stack == null || stack.isEmpty()) {
             cir.setReturnValue(0L);
         }
     }
