@@ -29,11 +29,6 @@ public abstract class TileEntityFactoryMixin<RECIPE extends MekanismRecipe> {
     @Shadow
     protected List<IInventorySlot> outputSlots;
 
-    @Shadow
-    @Nullable
-    protected abstract RECIPE findRecipe(int process, @NotNull ItemStack fallbackInput, @NotNull IInventorySlot outputSlot,
-                                         @Nullable IInventorySlot secondaryOutputSlot);
-
     @Inject(method = "sortInventory", at = @At("HEAD"), cancellable = true)
     private void onSortInventory(CallbackInfo ci) {
         TileEntityFactory<?> self = (TileEntityFactory<?>) (Object) this;
@@ -44,10 +39,12 @@ public abstract class TileEntityFactoryMixin<RECIPE extends MekanismRecipe> {
 
     /**
      * O(1) Fast recipe lookup cache for factory machines.
+     * Injects into the concrete getRecipeForInput method (not abstract findRecipe).
      */
-    @Inject(method = "findRecipe", at = @At("HEAD"), cancellable = true)
-    private void onFindRecipeFast(int process, @NotNull ItemStack fallbackInput, @NotNull IInventorySlot outputSlot,
-                                  @Nullable IInventorySlot secondaryOutputSlot, CallbackInfoReturnable<RECIPE> cir) {
+    @Inject(method = "getRecipeForInput", at = @At("HEAD"), cancellable = true)
+    private void onGetRecipeForInputFast(int process, @NotNull ItemStack fallbackInput, @NotNull IInventorySlot outputSlot,
+                                        @Nullable IInventorySlot secondaryOutputSlot, boolean updateCache,
+                                        CallbackInfoReturnable<RECIPE> cir) {
         if (!MekanismOptimizerConfig.ENABLE_ADDON_OPTIMIZATIONS.get()) {
             return;
         }
@@ -56,6 +53,25 @@ public abstract class TileEntityFactoryMixin<RECIPE extends MekanismRecipe> {
             RECIPE cached = FastRecipeLookupCache.getSingleItemRecipe(fallbackInput);
             if (cached != null) {
                 cir.setReturnValue(cached);
+            }
+        }
+    }
+
+    /**
+     * Cache the resolved recipe on return of getRecipeForInput.
+     */
+    @Inject(method = "getRecipeForInput", at = @At("RETURN"))
+    private void onGetRecipeForInputReturn(int process, @NotNull ItemStack fallbackInput, @NotNull IInventorySlot outputSlot,
+                                          @Nullable IInventorySlot secondaryOutputSlot, boolean updateCache,
+                                          CallbackInfoReturnable<RECIPE> cir) {
+        if (!MekanismOptimizerConfig.ENABLE_ADDON_OPTIMIZATIONS.get()) {
+            return;
+        }
+
+        if (!fallbackInput.isEmpty() && outputSlot.isEmpty() && (secondaryOutputSlot == null || secondaryOutputSlot.isEmpty())) {
+            RECIPE res = cir.getReturnValue();
+            if (res != null) {
+                FastRecipeLookupCache.putSingleItemRecipe(fallbackInput, res);
             }
         }
     }
