@@ -25,6 +25,7 @@ public class MekanismOptimizer {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
+        com.mekanismoptimizer.core.FastRecipeLookupCache.init();
         MekanismOptimizerLogger.info("Mekanism Optimizer initialized with " + ParallelWorkerPool.getThreadCount() + " worker threads.");
     }
 

@@ -1,6 +1,8 @@
 package com.mekanismoptimizer.mixin;
 
+import com.mekanismoptimizer.core.FastRecipeLookupCache;
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
+import mekanism.api.recipes.ItemStackToItemStackRecipe;
 import mekanism.common.inventory.slot.InputInventorySlot;
 import mekanism.common.inventory.slot.OutputInventorySlot;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
@@ -11,6 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Pseudo
 @Mixin(value = TileEntityElectricMachine.class, remap = false)
@@ -21,6 +24,39 @@ public abstract class TileEntityElectricMachineMixin {
 
     @Shadow
     OutputInventorySlot outputSlot;
+
+    /**
+     * O(1) Fast recipe lookup cache check for all single-item electric machines (Smelter, Crusher, Enrichment, etc.)
+     */
+    @Inject(method = "getRecipe", at = @At("HEAD"), cancellable = true)
+    private void onGetRecipeHead(int cacheIndex, CallbackInfoReturnable<ItemStackToItemStackRecipe> cir) {
+        if (!MekanismOptimizerConfig.ENABLE_ADDON_OPTIMIZATIONS.get()) {
+            return;
+        }
+
+        if (inputSlot != null && !inputSlot.isEmpty()) {
+            ItemStack stack = inputSlot.getStack();
+            ItemStackToItemStackRecipe cached = FastRecipeLookupCache.getSingleItemRecipe(stack);
+            if (cached != null) {
+                cir.setReturnValue(cached);
+            }
+        }
+    }
+
+    /**
+     * Cache the resolved recipe on return.
+     */
+    @Inject(method = "getRecipe", at = @At("RETURN"))
+    private void onGetRecipeReturn(int cacheIndex, CallbackInfoReturnable<ItemStackToItemStackRecipe> cir) {
+        if (!MekanismOptimizerConfig.ENABLE_ADDON_OPTIMIZATIONS.get()) {
+            return;
+        }
+
+        if (inputSlot != null && !inputSlot.isEmpty()) {
+            ItemStack stack = inputSlot.getStack();
+            FastRecipeLookupCache.putSingleItemRecipe(stack, cir.getReturnValue());
+        }
+    }
 
     /**
      * O(1) Fast early return for completely empty or stalled electric machines (Energized Smelter, Crusher, etc.)
