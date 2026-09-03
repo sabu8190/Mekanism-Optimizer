@@ -36,7 +36,7 @@ public abstract class LogisticalTransporterBaseMixin {
      */
     @Inject(method = "onUpdateServer", at = @At("HEAD"))
     private void onUpdateServerHead(CallbackInfo ci) {
-        if (!MekanismOptimizerConfig.ENABLE_ADDON_OPTIMIZATIONS.get()) {
+        if (!MekanismOptimizerConfig.ENABLE_ITEM_OVERCLOCK.get()) {
             return;
         }
 
@@ -53,7 +53,7 @@ public abstract class LogisticalTransporterBaseMixin {
         // Perform burst extraction if in PULL mode and connected
         Set<Direction> pullSides = self.getConnections(ConnectionType.PULL);
         if (pullSides != null && !pullSides.isEmpty()) {
-            int maxBurst = MekanismOptimizerConfig.ITEM_EJECT_MAX_STACKS_PER_TICK.get();
+            int maxBurst = MekanismOptimizerConfig.ITEM_BURST_PER_TICK.get();
             if (maxBurst < 1) maxBurst = 16;
 
             for (Direction side : pullSides) {

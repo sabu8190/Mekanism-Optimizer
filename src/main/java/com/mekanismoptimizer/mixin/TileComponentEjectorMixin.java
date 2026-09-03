@@ -57,17 +57,26 @@ public abstract class TileComponentEjectorMixin {
         }
 
         // Multi-burst ejection for fluid, chemical and energy
-        if (MekanismOptimizerConfig.ENABLE_UNLIMITED_AUTO_EJECT.get()) {
-            int burstMultiplier = MekanismOptimizerConfig.AUTO_EJECT_BURST_MULTIPLIER.get();
-            if (burstMultiplier > 1) {
-                for (Map.Entry<TransmissionType, ConfigInfo> entry : configInfo.entrySet()) {
-                    TransmissionType type = entry.getKey();
-                    ConfigInfo info = entry.getValue();
-                    if (type != TransmissionType.ITEM && type != TransmissionType.HEAT && isEjecting(info, type)) {
-                        for (int i = 0; i < burstMultiplier - 1; i++) {
-                            eject(type, info);
-                        }
-                    }
+        for (Map.Entry<TransmissionType, ConfigInfo> entry : configInfo.entrySet()) {
+            TransmissionType type = entry.getKey();
+            ConfigInfo info = entry.getValue();
+
+            if (type == TransmissionType.ITEM || type == TransmissionType.HEAT || !isEjecting(info, type)) {
+                continue;
+            }
+
+            int burst = 1;
+            if (type == TransmissionType.FLUID && MekanismOptimizerConfig.ENABLE_FLUID_OVERCLOCK.get()) {
+                burst = MekanismOptimizerConfig.FLUID_BURST_PER_TICK.get();
+            } else if (type.isChemical() && MekanismOptimizerConfig.ENABLE_CHEMICAL_OVERCLOCK.get()) {
+                burst = MekanismOptimizerConfig.CHEMICAL_BURST_PER_TICK.get();
+            } else if (type == TransmissionType.ENERGY && MekanismOptimizerConfig.ENABLE_ENERGY_OVERCLOCK.get()) {
+                burst = MekanismOptimizerConfig.ENERGY_BURST_PER_TICK.get();
+            }
+
+            if (burst > 1) {
+                for (int i = 0; i < burst - 1; i++) {
+                    eject(type, info);
                 }
             }
         }
@@ -75,15 +84,15 @@ public abstract class TileComponentEjectorMixin {
 
     /**
      * Multi-burst auto-ejection for ITEMS when overclocking is enabled.
-     * Fires up to ITEM_EJECT_MAX_STACKS_PER_TICK stacks per tick directly from machine Auto-Eject.
+     * Fires up to ITEM_BURST_PER_TICK stacks per tick directly from machine Auto-Eject.
      */
     @Inject(method = "tickServer", at = @At("TAIL"))
     private void onTickServerTail(CallbackInfo ci) {
-        if (tile == null || !MekanismOptimizerConfig.ENABLE_UNLIMITED_AUTO_EJECT.get()) {
+        if (tile == null || !MekanismOptimizerConfig.ENABLE_ITEM_OVERCLOCK.get()) {
             return;
         }
 
-        int maxBurst = MekanismOptimizerConfig.ITEM_EJECT_MAX_STACKS_PER_TICK.get();
+        int maxBurst = MekanismOptimizerConfig.ITEM_BURST_PER_TICK.get();
         if (maxBurst <= 1) {
             return;
         }
@@ -92,7 +101,7 @@ public abstract class TileComponentEjectorMixin {
         if (itemConfig != null && isEjecting(itemConfig, TransmissionType.ITEM)) {
             for (int i = 1; i < maxBurst; i++) {
                 if (!hasAnyEjectableItem(itemConfig)) {
-                    break; // No more items to eject or slots are empty, stop immediately (O(1))
+                    break; // No more items to eject, stop immediately (O(1))
                 }
                 outputItems(itemConfig);
             }

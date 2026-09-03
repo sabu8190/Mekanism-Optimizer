@@ -30,10 +30,27 @@ public final class MekanismOptimizerConfig {
     // Dedicated File Logger
     public static final ForgeConfigSpec.BooleanValue ENABLE_DEDICATED_LOG_FILE;
 
-    // Auto-Eject Rate & 2.1B Bypass Settings
+    // ==================== OVERCLOCKING TUNING (ITEM, FLUID, CHEMICAL, ENERGY) ====================
+    // ITEM Overclock
+    public static final ForgeConfigSpec.BooleanValue ENABLE_ITEM_OVERCLOCK;
+    public static final ForgeConfigSpec.IntValue ITEM_BURST_PER_TICK;
+    public static final ForgeConfigSpec.IntValue ITEM_EJECT_TICK_DELAY;
+
+    // FLUID Overclock
+    public static final ForgeConfigSpec.BooleanValue ENABLE_FLUID_OVERCLOCK;
+    public static final ForgeConfigSpec.IntValue FLUID_BURST_PER_TICK;
+
+    // CHEMICAL (GAS) Overclock
+    public static final ForgeConfigSpec.BooleanValue ENABLE_CHEMICAL_OVERCLOCK;
+    public static final ForgeConfigSpec.IntValue CHEMICAL_BURST_PER_TICK;
+
+    // ENERGY Overclock
+    public static final ForgeConfigSpec.BooleanValue ENABLE_ENERGY_OVERCLOCK;
+    public static final ForgeConfigSpec.IntValue ENERGY_BURST_PER_TICK;
+
+    // Legacy Aliases
     public static final ForgeConfigSpec.BooleanValue ENABLE_UNLIMITED_AUTO_EJECT;
     public static final ForgeConfigSpec.IntValue AUTO_EJECT_BURST_MULTIPLIER;
-    public static final ForgeConfigSpec.IntValue ITEM_EJECT_TICK_DELAY;
     public static final ForgeConfigSpec.IntValue ITEM_EJECT_MAX_STACKS_PER_TICK;
 
     public static final ForgeConfigSpec.IntValue MAX_BACKOFF_TICKS;
@@ -139,27 +156,62 @@ public final class MekanismOptimizerConfig {
 
         builder.pop();
 
-        builder.comment("Auto-Eject & Transfer Rate Tuning").push("Auto-Eject Tuning");
+        // ==================== OVERCLOCKING TUNING ====================
+        builder.comment("Overclocking Tuning for Item, Fluid, Chemical, Energy").push("Overclocking Tuning");
 
-        ENABLE_UNLIMITED_AUTO_EJECT = builder
-                .comment("Enable multi-burst auto-eject to bypass the 2.14 billion (Integer.MAX_VALUE) limit per tick.")
-                .translation("mekanism_optimizer.config.enableUnlimitedAutoEject")
-                .define("enableUnlimitedAutoEject", false);
+        // --- ITEM OVERCLOCK ---
+        ENABLE_ITEM_OVERCLOCK = builder
+                .comment("Enable overclocked burst transfer and extraction for ITEMS (transporters and machine auto-eject).")
+                .translation("mekanism_optimizer.config.enableItemOverclock")
+                .define("enableItemOverclock", true);
 
-        AUTO_EJECT_BURST_MULTIPLIER = builder
-                .comment("Maximum burst ejection iterations per tick for fluids, gases, and energy (e.g. 64 = up to 64x standard rate per tick).")
-                .translation("mekanism_optimizer.config.autoEjectBurstMultiplier")
-                .defineInRange("autoEjectBurstMultiplier", 64, 1, 1024);
+        ITEM_BURST_PER_TICK = builder
+                .comment("Maximum item stacks to insert/extract/eject in a single tick (e.g. 64 stacks/tick).")
+                .translation("mekanism_optimizer.config.itemBurstPerTick")
+                .defineInRange("itemBurstPerTick", 64, 1, 512);
 
         ITEM_EJECT_TICK_DELAY = builder
                 .comment("Tick delay between item auto-ejection cycles (0 = eject every tick, vanilla Mekanism default is 10).")
                 .translation("mekanism_optimizer.config.itemEjectTickDelay")
                 .defineInRange("itemEjectTickDelay", 0, 0, 20);
 
-        ITEM_EJECT_MAX_STACKS_PER_TICK = builder
-                .comment("Maximum item stacks to eject in a single tick (e.g. 64 stacks/tick).")
-                .translation("mekanism_optimizer.config.itemEjectMaxStacksPerTick")
-                .defineInRange("itemEjectMaxStacksPerTick", 64, 1, 512);
+        // --- FLUID OVERCLOCK ---
+        ENABLE_FLUID_OVERCLOCK = builder
+                .comment("Enable overclocked burst transfer and extraction for FLUIDS (mechanical pipes and machine auto-eject).")
+                .translation("mekanism_optimizer.config.enableFluidOverclock")
+                .define("enableFluidOverclock", true);
+
+        FLUID_BURST_PER_TICK = builder
+                .comment("Maximum fluid transfer iterations per tick (e.g. 64 iterations/tick).")
+                .translation("mekanism_optimizer.config.fluidBurstPerTick")
+                .defineInRange("fluidBurstPerTick", 64, 1, 512);
+
+        // --- CHEMICAL (GAS) OVERCLOCK ---
+        ENABLE_CHEMICAL_OVERCLOCK = builder
+                .comment("Enable overclocked burst transfer and extraction for CHEMICALS/GASES (pressurized tubes and machine auto-eject).")
+                .translation("mekanism_optimizer.config.enableChemicalOverclock")
+                .define("enableChemicalOverclock", true);
+
+        CHEMICAL_BURST_PER_TICK = builder
+                .comment("Maximum chemical/gas transfer iterations per tick (e.g. 64 iterations/tick).")
+                .translation("mekanism_optimizer.config.chemicalBurstPerTick")
+                .defineInRange("chemicalBurstPerTick", 64, 1, 512);
+
+        // --- ENERGY OVERCLOCK ---
+        ENABLE_ENERGY_OVERCLOCK = builder
+                .comment("Enable overclocked burst transfer and extraction for ENERGY (universal cables and machine auto-eject).")
+                .translation("mekanism_optimizer.config.enableEnergyOverclock")
+                .define("enableEnergyOverclock", true);
+
+        ENERGY_BURST_PER_TICK = builder
+                .comment("Maximum energy transfer iterations per tick (e.g. 64 iterations/tick).")
+                .translation("mekanism_optimizer.config.energyBurstPerTick")
+                .defineInRange("energyBurstPerTick", 64, 1, 512);
+
+        // Legacy Aliases
+        ENABLE_UNLIMITED_AUTO_EJECT = ENABLE_ITEM_OVERCLOCK;
+        AUTO_EJECT_BURST_MULTIPLIER = FLUID_BURST_PER_TICK;
+        ITEM_EJECT_MAX_STACKS_PER_TICK = ITEM_BURST_PER_TICK;
 
         builder.pop();
 
