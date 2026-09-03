@@ -29,6 +29,7 @@
     "generators.TileEntityGeneratorMixin",
     "BasicInventorySlotMixin",
     "MekanismUtilsMixin",
+    "LogisticalTransporterBaseMixin",
     "addons.EvolvedLunarActivatorMixin",
     "addons.BEGreenHouseMixin"
   ],
