@@ -45,64 +45,15 @@ public abstract class TileComponentEjectorMixin {
             return;
         }
 
-        // Clamp tick delay to configured value (0 = instant ejection every tick)
+        // Clamp tick delay to configured value (default 0 for instant responsive ejection)
         int configuredDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
         if (tickDelay > configuredDelay) {
             tickDelay = configuredDelay;
         }
-
-        // Multi-burst ejection for fluid, chemical and energy
-        for (Map.Entry<TransmissionType, ConfigInfo> entry : configInfo.entrySet()) {
-            TransmissionType type = entry.getKey();
-            ConfigInfo info = entry.getValue();
-
-            if (type == TransmissionType.ITEM || type == TransmissionType.HEAT || !isEjecting(info, type)) {
-                continue;
-            }
-
-            int burst = 1;
-            if (type == TransmissionType.FLUID && MekanismOptimizerConfig.ENABLE_FLUID_OVERCLOCK.get()) {
-                burst = MekanismOptimizerConfig.FLUID_BURST_PER_TICK.get();
-            } else if (type.isChemical() && MekanismOptimizerConfig.ENABLE_CHEMICAL_OVERCLOCK.get()) {
-                burst = MekanismOptimizerConfig.CHEMICAL_BURST_PER_TICK.get();
-            } else if (type == TransmissionType.ENERGY && MekanismOptimizerConfig.ENABLE_ENERGY_OVERCLOCK.get()) {
-                burst = MekanismOptimizerConfig.ENERGY_BURST_PER_TICK.get();
-            }
-
-            if (burst > 1) {
-                for (int i = 0; i < burst - 1; i++) {
-                    eject(type, info);
-                }
-            }
-        }
     }
 
     /**
-     * Multi-burst auto-ejection for ITEMS when overclocking is enabled.
-     * Native outputItems handles the first ejection. This loop performs subsequent burst ejections safely.
-     */
-    @Inject(method = "tickServer", at = @At("TAIL"))
-    private void onTickServerTail(CallbackInfo ci) {
-        if (tile == null || !MekanismOptimizerConfig.ENABLE_ITEM_OVERCLOCK.get()) {
-            return;
-        }
-
-        int maxBurst = MekanismOptimizerConfig.ITEM_BURST_PER_TICK.get();
-        if (maxBurst <= 1) {
-            return;
-        }
-
-        ConfigInfo itemConfig = configInfo.get(TransmissionType.ITEM);
-        if (itemConfig != null && isEjecting(itemConfig, TransmissionType.ITEM)) {
-            for (int i = 1; i < maxBurst; i++) {
-                outputItems(itemConfig);
-            }
-        }
-    }
-
-    /**
-     * After outputItems completes, immediately reset tickDelay to configured value (0)
-     * so that the machine never waits 10 ticks (0.5s) between ejections.
+     * Resets tickDelay after item ejection to eliminate hardcoded 10-tick (0.5s) lag.
      */
     @Inject(method = "outputItems", at = @At("TAIL"))
     private void onOutputItemsTail(ConfigInfo info, CallbackInfo ci) {

@@ -29,10 +29,6 @@
     "generators.TileEntityGeneratorMixin",
     "BasicInventorySlotMixin",
     "MekanismUtilsMixin",
-    "LogisticalTransporterBaseMixin",
-    "MechanicalPipeMixin",
-    "BoxedPressurizedTubeMixin",
-    "UniversalCableMixin",
     "addons.EvolvedLunarActivatorMixin",
     "addons.BEGreenHouseMixin"
   ],
