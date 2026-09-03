@@ -1,14 +1,10 @@
 package com.mekanismoptimizer.mixin;
 
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
-import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.component.TileComponentEjector;
 import mekanism.common.tile.component.config.ConfigInfo;
-import mekanism.common.tile.component.config.DataType;
-import mekanism.common.tile.component.config.slot.ISlotInfo;
-import mekanism.common.tile.component.config.slot.InventorySlotInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -17,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
 import java.util.Map;
 
 @Pseudo
@@ -50,7 +45,7 @@ public abstract class TileComponentEjectorMixin {
             return;
         }
 
-        // Clamp tick delay to configured value (0 or 1 for instant response)
+        // Clamp tick delay to configured value (0 = instant ejection every tick)
         int configuredDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
         if (tickDelay > configuredDelay) {
             tickDelay = configuredDelay;
@@ -84,7 +79,7 @@ public abstract class TileComponentEjectorMixin {
 
     /**
      * Multi-burst auto-ejection for ITEMS when overclocking is enabled.
-     * Fires up to ITEM_BURST_PER_TICK stacks per tick directly from machine Auto-Eject.
+     * Native outputItems handles the first ejection. This loop performs subsequent burst ejections safely.
      */
     @Inject(method = "tickServer", at = @At("TAIL"))
     private void onTickServerTail(CallbackInfo ci) {
@@ -100,60 +95,17 @@ public abstract class TileComponentEjectorMixin {
         ConfigInfo itemConfig = configInfo.get(TransmissionType.ITEM);
         if (itemConfig != null && isEjecting(itemConfig, TransmissionType.ITEM)) {
             for (int i = 1; i < maxBurst; i++) {
-                if (!hasAnyEjectableItem(itemConfig)) {
-                    break; // No more items to eject, stop immediately (O(1))
-                }
                 outputItems(itemConfig);
             }
         }
     }
 
     /**
-     * O(1) Fast check for outputItems:
-     * If all output slots are completely empty, cancel immediately without running heavy search/shuffle.
-     * If there ARE items to output, let native Mekanism outputItems execute with 100% fidelity.
+     * After outputItems completes, immediately reset tickDelay to configured value (0)
+     * so that the machine never waits 10 ticks (0.5s) between ejections.
      */
-    @Inject(method = "outputItems", at = @At("HEAD"), cancellable = true)
-    private void onOutputItemsHead(ConfigInfo info, CallbackInfo ci) {
-        if (tile == null || tile.getLevel() == null) {
-            ci.cancel();
-            return;
-        }
-
-        if (!MekanismOptimizerConfig.ENABLE_ADDON_OPTIMIZATIONS.get()) {
-            return;
-        }
-
-        if (!hasAnyEjectableItem(info)) {
-            this.tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
-            ci.cancel();
-        }
-    }
-
     @Inject(method = "outputItems", at = @At("TAIL"))
     private void onOutputItemsTail(ConfigInfo info, CallbackInfo ci) {
-        // Reset tickDelay after ejection to avoid hardcoded 10-tick wait
         this.tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
-    }
-
-    private boolean hasAnyEjectableItem(ConfigInfo info) {
-        for (DataType dataType : info.getSupportedDataTypes()) {
-            if (!dataType.canOutput()) {
-                continue;
-            }
-            ISlotInfo slotInfo = info.getSlotInfo(dataType);
-            if (slotInfo instanceof InventorySlotInfo inventorySlotInfo) {
-                List<IInventorySlot> slots = inventorySlotInfo.getSlots();
-                if (slots != null && !slots.isEmpty()) {
-                    for (int i = 0; i < slots.size(); i++) {
-                        IInventorySlot slot = slots.get(i);
-                        if (slot != null && !slot.isEmpty()) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 }
