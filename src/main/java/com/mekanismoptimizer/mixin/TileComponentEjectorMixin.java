@@ -1,6 +1,7 @@
 package com.mekanismoptimizer.mixin;
 
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
+import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.text.EnumColor;
 import mekanism.common.lib.inventory.TileTransitRequest;
 import mekanism.common.lib.inventory.TransitRequest.TransitResponse;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,6 +84,7 @@ public abstract class TileComponentEjectorMixin {
 
     /**
      * Replaces outputItems with robust Multi-Stack ejection engine.
+     * Features O(1) early-exit when output slots are completely empty.
      */
     @Inject(method = "outputItems", at = @At("HEAD"), cancellable = true)
     private void onOutputItems(ConfigInfo info, CallbackInfo ci) {
@@ -103,13 +106,32 @@ public abstract class TileComponentEjectorMixin {
             }
             ISlotInfo slotInfo = info.getSlotInfo(dataType);
             if (slotInfo instanceof InventorySlotInfo inventorySlotInfo) {
+                List<IInventorySlot> slots = inventorySlotInfo.getSlots();
+                if (slots == null || slots.isEmpty()) {
+                    continue;
+                }
+
+                // O(1) Fast early return if all slots for this output data type are empty
+                boolean hasAnyItem = false;
+                for (int i = 0; i < slots.size(); i++) {
+                    IInventorySlot slot = slots.get(i);
+                    if (slot != null && !slot.isEmpty()) {
+                        hasAnyItem = true;
+                        break;
+                    }
+                }
+
+                if (!hasAnyItem) {
+                    continue; // Skip without creating any TileTransitRequest or iterating sides
+                }
+
                 Set<Direction> outputs = info.getSidesForData(dataType);
                 if (!outputs.isEmpty()) {
                     for (int stackCount = 0; stackCount < maxStacks; stackCount++) {
                         Direction firstSide = outputs.iterator().next();
                         TileTransitRequest ejectMap = InventoryUtils.getEjectItemMap(
                                 new TileTransitRequest(tile, firstSide), 
-                                inventorySlotInfo.getSlots()
+                                slots
                         );
 
                         if (ejectMap.isEmpty()) {
@@ -120,7 +142,6 @@ public abstract class TileComponentEjectorMixin {
                         for (Direction side : outputs) {
                             BlockEntity target = WorldUtils.getTileEntity(tile.getLevel(), tile.getBlockPos().relative(side));
                             if (target != null) {
-                                // Set side on request if supported or target appropriately
                                 TransitResponse response;
                                 if (target instanceof TileEntityLogisticalTransporterBase transporter) {
                                     response = transporter.getTransmitter().insert(tile, ejectMap, outputColor, true, 0);
