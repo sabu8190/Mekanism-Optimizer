@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Pseudo
 @Mixin(value = TileComponentEjector.class, remap = false)
@@ -42,13 +41,16 @@ public abstract class TileComponentEjectorMixin {
     @Shadow
     protected abstract void eject(TransmissionType type, ConfigInfo info);
 
+    @Shadow
+    protected abstract void outputItems(ConfigInfo info);
+
     @Inject(method = "tickServer", at = @At("HEAD"))
     private void onTickServerHead(CallbackInfo ci) {
         if (tile == null) {
             return;
         }
 
-        // Clamp tick delay to configured value (default 0 or 1 for instant response)
+        // Clamp tick delay to configured value (0 or 1 for instant response)
         int configuredDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
         if (tickDelay > configuredDelay) {
             tickDelay = configuredDelay;
@@ -72,6 +74,32 @@ public abstract class TileComponentEjectorMixin {
     }
 
     /**
+     * Multi-burst auto-ejection for ITEMS when overclocking is enabled.
+     * Fires up to ITEM_EJECT_MAX_STACKS_PER_TICK stacks per tick directly from machine Auto-Eject.
+     */
+    @Inject(method = "tickServer", at = @At("TAIL"))
+    private void onTickServerTail(CallbackInfo ci) {
+        if (tile == null || !MekanismOptimizerConfig.ENABLE_UNLIMITED_AUTO_EJECT.get()) {
+            return;
+        }
+
+        int maxBurst = MekanismOptimizerConfig.ITEM_EJECT_MAX_STACKS_PER_TICK.get();
+        if (maxBurst <= 1) {
+            return;
+        }
+
+        ConfigInfo itemConfig = configInfo.get(TransmissionType.ITEM);
+        if (itemConfig != null && isEjecting(itemConfig, TransmissionType.ITEM)) {
+            for (int i = 1; i < maxBurst; i++) {
+                if (!hasAnyEjectableItem(itemConfig)) {
+                    break; // No more items to eject or slots are empty, stop immediately (O(1))
+                }
+                outputItems(itemConfig);
+            }
+        }
+    }
+
+    /**
      * O(1) Fast check for outputItems:
      * If all output slots are completely empty, cancel immediately without running heavy search/shuffle.
      * If there ARE items to output, let native Mekanism outputItems execute with 100% fidelity.
@@ -87,7 +115,19 @@ public abstract class TileComponentEjectorMixin {
             return;
         }
 
-        boolean hasAnyEjectableItem = false;
+        if (!hasAnyEjectableItem(info)) {
+            this.tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "outputItems", at = @At("TAIL"))
+    private void onOutputItemsTail(ConfigInfo info, CallbackInfo ci) {
+        // Reset tickDelay after ejection to avoid hardcoded 10-tick wait
+        this.tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
+    }
+
+    private boolean hasAnyEjectableItem(ConfigInfo info) {
         for (DataType dataType : info.getSupportedDataTypes()) {
             if (!dataType.canOutput()) {
                 continue;
@@ -99,27 +139,12 @@ public abstract class TileComponentEjectorMixin {
                     for (int i = 0; i < slots.size(); i++) {
                         IInventorySlot slot = slots.get(i);
                         if (slot != null && !slot.isEmpty()) {
-                            hasAnyEjectableItem = true;
-                            break;
+                            return true;
                         }
                     }
                 }
             }
-            if (hasAnyEjectableItem) {
-                break;
-            }
         }
-
-        // If completely empty, skip without running getEjectItemMap or searching neighbors
-        if (!hasAnyEjectableItem) {
-            this.tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "outputItems", at = @At("TAIL"))
-    private void onOutputItemsTail(ConfigInfo info, CallbackInfo ci) {
-        // Reset tickDelay after ejection to avoid hardcoded 10-tick wait
-        this.tickDelay = MekanismOptimizerConfig.ITEM_EJECT_TICK_DELAY.get();
+        return false;
     }
 }
