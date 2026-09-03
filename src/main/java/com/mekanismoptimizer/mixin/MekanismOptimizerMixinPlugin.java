@@ -24,6 +24,9 @@ public class MekanismOptimizerMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.contains("addons.Evolved")) {
             return FMLLoader.getLoadingModList().getModFileById("evolvedmekanism") != null;
         }
+        if (mixinClassName.contains("addons.AM") || mixinClassName.contains("addons.EssentialSmelting")) {
+            return FMLLoader.getLoadingModList().getModFileById("astral_mekanism") != null;
+        }
         return true;
     }
 
