@@ -16,9 +16,10 @@ public abstract class BEGreenHouseMixin {
     /**
      * O(1) Fast path for Astral Mekanism CropSoilRecipe emptyableTest.
      * Prevents thousands of full recipe and ingredient list traversals per tick for GreenHouse machines.
+     * Note: emptyableTest is an instance method, so handler must NOT be static.
      */
-    @Inject(method = "emptyableTest", at = @At("HEAD"), cancellable = true, require = 0)
-    private static void onEmptyableTest(ItemStack crop, ItemStack soil, Object recipe, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "emptyableTest", at = @At("HEAD"), cancellable = true, remap = false, require = 0)
+    private void onEmptyableTest(ItemStack crop, ItemStack soil, CallbackInfoReturnable<Boolean> cir) {
         if (!MekanismOptimizerConfig.ENABLE_ADDON_OPTIMIZATIONS.get()) {
             return;
         }
@@ -26,7 +27,7 @@ public abstract class BEGreenHouseMixin {
         if (crop != null && soil != null && !crop.isEmpty() && !soil.isEmpty()) {
             Object cached = FastRecipeLookupCache.getCropSoilRecipe(crop, soil);
             if (cached != null) {
-                cir.setReturnValue(cached == recipe);
+                cir.setReturnValue(cached == (Object) this);
             }
         }
     }
