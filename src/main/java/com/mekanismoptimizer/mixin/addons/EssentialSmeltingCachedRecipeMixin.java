@@ -38,9 +38,13 @@ public abstract class EssentialSmeltingCachedRecipeMixin {
     @Unique private InfusionStack mekanism_optimizer$cachedXpStack = InfusionStack.EMPTY;
     @Unique private ItemStack mekanism_optimizer$cachedResultItem = ItemStack.EMPTY;
 
+    /**
+     * Inject at HEAD but DO NOT cancel before super check.
+     * We replace only the recipe input/output calculation part after super.calculateOperationsThisTick(tracker) has run.
+     */
     @SuppressWarnings("unchecked")
-    @Inject(method = "calculateOperationsThisTick", at = @At("HEAD"), cancellable = true)
-    private void onCalculateOperationsThisTick(OperationTracker tracker, CallbackInfo ci) {
+    @Inject(method = "calculateOperationsThisTick", at = @At(value = "INVOKE", target = "Lastral_mekanism/generalrecipe/cachedrecipe/GeneralCachedRecipe;calculateOperationsThisTick(Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker;)V", shift = At.Shift.AFTER), cancellable = true)
+    private void onCalculateOperationsThisTickOptimized(OperationTracker tracker, CallbackInfo ci) {
         if (!tracker.shouldContinueChecking()) {
             ci.cancel();
             return;

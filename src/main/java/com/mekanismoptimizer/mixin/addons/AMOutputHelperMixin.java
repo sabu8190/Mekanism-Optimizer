@@ -1,8 +1,6 @@
 package com.mekanismoptimizer.mixin.addons;
 
 import astral_mekanism.recipes.output.AMOutputHelper;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.fluid.IExtendedFluidTank;
@@ -40,8 +38,15 @@ public abstract class AMOutputHelperMixin {
             return;
         }
 
+        int limit = slot.getLimit(toOutput);
+        if (limit <= 0) {
+            tracker.updateOperations(0);
+            tracker.addError(notEnoughSpace);
+            ci.cancel();
+            return;
+        }
+
         if (current.isEmpty()) {
-            int limit = slot.getLimit(toOutput);
             int operations = limit / outputCount;
             tracker.updateOperations(operations);
             if (operations == 0) {
@@ -51,14 +56,13 @@ public abstract class AMOutputHelperMixin {
             return;
         }
 
-        if (!ItemHandlerHelper.canItemStacksStack(current, toOutput) || !slot.isItemValid(toOutput)) {
+        if (!ItemHandlerHelper.canItemStacksStack(current, toOutput)) {
             tracker.updateOperations(0);
             tracker.addError(notEnoughSpace);
             ci.cancel();
             return;
         }
 
-        int limit = slot.getLimit(toOutput);
         int currentCount = current.getCount();
         int space = limit - currentCount;
         if (space <= 0) {

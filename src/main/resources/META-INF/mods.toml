@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/sabu8190/Mekanism-Optimizer/issues"
 
 [[mods]]
 modId="mekanism_optimizer"
-version="1.2.0"
+version="1.2.1"
 displayName="Mekanism Optimizer"
 updateJSONURL="https://github.com/sabu8190/Mekanism-Optimizer/releases"
 displayURL="https://github.com/sabu8190/Mekanism-Optimizer"
