@@ -35,7 +35,10 @@
     "addons.BEGreenHouseMixin",
     "addons.AMOutputHelperMixin",
     "addons.EssentialSmeltingCachedRecipeMixin",
-    "addons.CropSoilInputRecipeCacheMixin"
+    "addons.CropSoilInputRecipeCacheMixin",
+    "addons.MoreMachineOutputHelperMixin",
+    "addons.EMExtraMoreMachineFactoryOutputSlotMixin",
+    "addons.EMExtraMoreMachineFactoryInputSlotMixin"
   ],
   "client": [],
   "server": [],
