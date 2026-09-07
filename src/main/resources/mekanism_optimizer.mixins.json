@@ -34,7 +34,8 @@
     "addons.EvolvedLunarActivatorMixin",
     "addons.BEGreenHouseMixin",
     "addons.AMOutputHelperMixin",
-    "addons.EssentialSmeltingCachedRecipeMixin"
+    "addons.EssentialSmeltingCachedRecipeMixin",
+    "addons.CropSoilInputRecipeCacheMixin"
   ],
   "client": [],
   "server": [],
