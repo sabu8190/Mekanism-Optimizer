@@ -19,9 +19,23 @@ public class MekanismOptimizer {
     private static long currentServerTick = 0;
 
     public MekanismOptimizer() {
+        ModLoadingContext.get().registerExtensionPoint(net.minecraftforge.fml.IExtensionPoint.DisplayTest.class,
+                () -> new net.minecraftforge.fml.IExtensionPoint.DisplayTest(
+                        () -> net.minecraftforge.network.NetworkConstants.IGNORESERVERONLY,
+                        (remoteVersion, isFromServer) -> true
+                )
+        );
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, MekanismOptimizerConfig.SPEC, "mekanism_optimizer-common.toml");
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         MinecraftForge.EVENT_BUS.register(this);
+
+        // クライアント側タイトル画面＆チャット更新通知リスナー登録
+        if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
+            MinecraftForge.EVENT_BUS.register(new com.mekanismoptimizer.client.MekanismOptimizerTitleScreenNotifier());
+        }
+
+        // バックグラウンド非同期アップデートチェッカー起動 (クライアント/サーバー両対応)
+        com.mekanismoptimizer.core.MekanismOptimizerUpdateNotifier.checkForUpdatesAsync();
     }
 
     private void setup(final FMLCommonSetupEvent event) {

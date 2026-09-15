@@ -37,6 +37,8 @@ public abstract class EssentialSmeltingCachedRecipeMixin {
     @Unique private int mekanism_optimizer$lastXpUpgrade = -1;
     @Unique private InfusionStack mekanism_optimizer$cachedXpStack = InfusionStack.EMPTY;
     @Unique private ItemStack mekanism_optimizer$cachedResultItem = ItemStack.EMPTY;
+    @Unique private ItemStack mekanism_optimizer$lastInputItem = ItemStack.EMPTY;
+    @Unique private ItemStack mekanism_optimizer$cachedRecipeInput = ItemStack.EMPTY;
 
     /**
      * Inject at HEAD but DO NOT cancel before super check.
@@ -68,7 +70,14 @@ public abstract class EssentialSmeltingCachedRecipeMixin {
             this.recipeOutput = new ItemInfuseOutput(mekanism_optimizer$cachedResultItem, mekanism_optimizer$cachedXpStack);
         }
 
-        this.recipeInput = inputHandler.getRecipeInput(inputIngredient);
+        if (mekanism_optimizer$cachedRecipeInput.isEmpty() || !ItemStack.isSameItemSameTags(inputStack, mekanism_optimizer$lastInputItem)) {
+            mekanism_optimizer$lastInputItem = inputStack.copyWithCount(1);
+            this.recipeInput = inputHandler.getRecipeInput(inputIngredient);
+            mekanism_optimizer$cachedRecipeInput = this.recipeInput;
+        } else {
+            this.recipeInput = mekanism_optimizer$cachedRecipeInput;
+        }
+
         if (this.recipeInput.isEmpty() || this.recipeOutput.itemStack().isEmpty()) {
             tracker.mismatchedRecipe();
             ci.cancel();

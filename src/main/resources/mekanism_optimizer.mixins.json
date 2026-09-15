@@ -38,7 +38,10 @@
     "addons.CropSoilInputRecipeCacheMixin",
     "addons.MoreMachineOutputHelperMixin",
     "addons.EMExtraMoreMachineFactoryOutputSlotMixin",
-    "addons.EMExtraMoreMachineFactoryInputSlotMixin"
+    "addons.EMExtraMoreMachineFactoryInputSlotMixin",
+    "addons.OperationTrackerOptimizerAccessor",
+    "addons.GeneralCachedRecipeMixin",
+    "addons.BlockEntityRecipeFactoryMixin"
   ],
   "client": [],
   "server": [],

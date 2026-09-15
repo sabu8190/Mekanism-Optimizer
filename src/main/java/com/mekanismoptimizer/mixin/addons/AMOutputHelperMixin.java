@@ -159,4 +159,75 @@ public abstract class AMOutputHelperMixin {
         }
         ci.cancel();
     }
+
+    /**
+     * Optimized fast execution path for handleOutput (Item).
+     * Avoids redundant copyWithCount and uses O(1) slot insertion.
+     */
+    @Inject(method = "handleOutput(Lmekanism/api/inventory/IInventorySlot;Lnet/minecraft/world/item/ItemStack;I)V", at = @At("HEAD"), cancellable = true)
+    private static void onHandleOutputItem(IInventorySlot slot, ItemStack toOutput, int operations, CallbackInfo ci) {
+        if (operations <= 0 || toOutput.isEmpty()) {
+            ci.cancel();
+            return;
+        }
+
+        int totalAmount = toOutput.getCount() * operations;
+        if (totalAmount <= 0) {
+            ci.cancel();
+            return;
+        }
+
+        ItemStack current = slot.getStack();
+        if (current.isEmpty()) {
+            slot.setStack(toOutput.copyWithCount(totalAmount));
+            ci.cancel();
+            return;
+        }
+
+        if (ItemHandlerHelper.canItemStacksStack(current, toOutput)) {
+            slot.insertItem(toOutput.copyWithCount(totalAmount), mekanism.api.Action.EXECUTE, mekanism.api.AutomationType.INTERNAL);
+            ci.cancel();
+            return;
+        }
+    }
+
+    /**
+     * Optimized fast execution path for handleOutput (Fluid).
+     */
+    @Inject(method = "handleOutput(Lmekanism/api/fluid/IExtendedFluidTank;Lnet/minecraftforge/fluids/FluidStack;I)V", at = @At("HEAD"), cancellable = true)
+    private static void onHandleOutputFluid(IExtendedFluidTank tank, FluidStack toOutput, int operations, CallbackInfo ci) {
+        if (operations <= 0 || toOutput.isEmpty()) {
+            ci.cancel();
+            return;
+        }
+
+        int totalAmount = toOutput.getAmount() * operations;
+        if (totalAmount <= 0) {
+            ci.cancel();
+            return;
+        }
+
+        tank.insert(new FluidStack(toOutput, totalAmount), mekanism.api.Action.EXECUTE, mekanism.api.AutomationType.INTERNAL);
+        ci.cancel();
+    }
+
+    /**
+     * Optimized fast execution path for handleOutput (Chemical).
+     */
+    @Inject(method = "handleOutput(Lmekanism/api/chemical/IChemicalTank;Lmekanism/api/chemical/ChemicalStack;I)V", at = @At("HEAD"), cancellable = true)
+    private static <STACK extends ChemicalStack<?>> void onHandleOutputChemical(IChemicalTank<?, STACK> tank, STACK toOutput, int operations, CallbackInfo ci) {
+        if (operations <= 0 || toOutput.isEmpty()) {
+            ci.cancel();
+            return;
+        }
+
+        long totalAmount = toOutput.getAmount() * (long) operations;
+        if (totalAmount <= 0) {
+            ci.cancel();
+            return;
+        }
+
+        tank.insert(tank.createStack(toOutput, totalAmount), mekanism.api.Action.EXECUTE, mekanism.api.AutomationType.INTERNAL);
+        ci.cancel();
+    }
 }

@@ -41,9 +41,15 @@ public abstract class BasicInventorySlotMixin {
     @Shadow
     public abstract boolean isEmpty();
 
+    @Shadow
+    public abstract void setStackUnchecked(ItemStack stack);
+
+    @Shadow
+    public abstract void onContentsChanged();
+
     /**
-     * O(1) Zero-allocation fast path for insertItem during simulation (e.g. AHOutputHelper or Ejector checks).
-     * Avoids millions of unnecessary ItemStack.copyWithCount / new ItemStack instances.
+     * O(1) Zero-allocation fast path for insertItem during simulation and execution.
+     * Avoids millions of unnecessary ItemStack allocations and redundant slot checks.
      */
     @Inject(method = "insertItem", at = @At("HEAD"), cancellable = true)
     private void onInsertItemFast(ItemStack stack, Action action, AutomationType automationType, CallbackInfoReturnable<ItemStack> cir) {
@@ -62,20 +68,41 @@ public abstract class BasicInventorySlotMixin {
             return;
         }
 
-        boolean sameType = isEmpty() || ItemHandlerHelper.canItemStacksStack(current, stack);
-        if (sameType) {
-            int toAdd = Math.min(stack.getCount(), needed);
-            if (action.simulate()) {
-                if (stack.getCount() == toAdd) {
-                    cir.setReturnValue(ItemStack.EMPTY);
-                    return;
-                }
-                // If nothing can be added
-                if (toAdd == 0) {
-                    cir.setReturnValue(stack);
-                    return;
-                }
+        boolean empty = isEmpty();
+        boolean sameType = empty || ItemHandlerHelper.canItemStacksStack(current, stack);
+        if (!sameType) {
+            // Mismatched item type in slot: fail immediately in O(1) without falling through
+            cir.setReturnValue(stack);
+            return;
+        }
+
+        int toAdd = Math.min(stack.getCount(), needed);
+        if (toAdd <= 0) {
+            cir.setReturnValue(stack);
+            return;
+        }
+
+        if (action.simulate()) {
+            if (stack.getCount() == toAdd) {
+                cir.setReturnValue(ItemStack.EMPTY);
+            } else {
+                cir.setReturnValue(stack.copyWithCount(stack.getCount() - toAdd));
             }
+            return;
+        }
+
+        // Action.EXECUTE
+        if (empty) {
+            setStackUnchecked(stack.copyWithCount(toAdd));
+        } else {
+            current.grow(toAdd);
+            onContentsChanged();
+        }
+
+        if (stack.getCount() == toAdd) {
+            cir.setReturnValue(ItemStack.EMPTY);
+        } else {
+            cir.setReturnValue(stack.copyWithCount(stack.getCount() - toAdd));
         }
     }
 }
