@@ -13,6 +13,7 @@
     "TileComponentChunkLoaderMixin",
     "TileEntityDimensionalStabilizerMixin",
     "TileComponentEjectorMixin",
+    "TileEntityUpdateableMixin",
     "TileEntitySolarNeutronActivatorMixin",
     "TileEntityElectricPumpMixin",
     "EnergyNetworkMixin",

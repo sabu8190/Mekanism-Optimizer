@@ -27,7 +27,7 @@ public abstract class TileEntityElectricPumpMixin {
         long currentTick = self.getLevel() != null ? self.getLevel().getGameTime() : 0;
 
         if (!AdaptiveBackoffManager.shouldRun(pos, currentTick)) {
-            MekanismOptimizerLogger.recordPumpThrottled();
+            MekanismOptimizerLogger.recordPumpSkip();
             cir.setReturnValue(false);
         }
     }
@@ -44,6 +44,7 @@ public abstract class TileEntityElectricPumpMixin {
 
         if (cir.getReturnValue()) {
             AdaptiveBackoffManager.recordSuccess(pos);
+            MekanismOptimizerLogger.recordPumpOptimized();
         } else {
             AdaptiveBackoffManager.recordFailure(pos, currentTick);
         }

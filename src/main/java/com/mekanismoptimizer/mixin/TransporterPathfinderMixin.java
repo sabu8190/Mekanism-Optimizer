@@ -1,5 +1,6 @@
 package com.mekanismoptimizer.mixin;
 
+import com.mekanismoptimizer.core.MekanismOptimizerLogger;
 import mekanism.common.content.network.transmitter.LogisticalTransporterBase;
 import mekanism.common.content.transporter.TransporterPathfinder;
 import mekanism.common.content.transporter.TransporterStack;
@@ -17,5 +18,6 @@ public abstract class TransporterPathfinderMixin {
     @Inject(method = "getNewBasePath(Lmekanism/common/content/network/transmitter/LogisticalTransporterBase;Lmekanism/common/content/transporter/TransporterStack;Lmekanism/common/lib/inventory/TransitRequest;I)Lmekanism/common/content/transporter/TransporterPathfinder$Destination;", at = @At("HEAD"))
     private static void onGetNewBasePath(LogisticalTransporterBase start, TransporterStack stack, TransitRequest request, int min,
                                          CallbackInfoReturnable<Object> cir) {
+        MekanismOptimizerLogger.recordPathCalculated();
     }
 }

@@ -28,7 +28,7 @@ public final class ParallelWorkerPool {
         EXECUTOR.execute(() -> {
             try {
                 task.run();
-                MekanismOptimizerLogger.recordParallelTask();
+                MekanismOptimizerLogger.recordMultithreadTask();
             } catch (Throwable t) {
                 MekanismOptimizerLogger.error("Error in parallel worker task", t);
             }
@@ -36,7 +36,7 @@ public final class ParallelWorkerPool {
     }
 
     public static <T> Future<T> submit(Callable<T> task) {
-        MekanismOptimizerLogger.recordParallelTask();
+        MekanismOptimizerLogger.recordMultithreadTask();
         return EXECUTOR.submit(task);
     }
 

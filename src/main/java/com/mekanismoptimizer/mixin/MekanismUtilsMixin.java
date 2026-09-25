@@ -3,7 +3,6 @@ package com.mekanismoptimizer.mixin;
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.util.MekanismUtils;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;

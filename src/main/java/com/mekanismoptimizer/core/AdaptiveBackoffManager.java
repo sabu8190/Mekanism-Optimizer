@@ -73,8 +73,11 @@ public class AdaptiveBackoffManager {
     }
 
     public static synchronized void notifyBlockUpdate(BlockPos pos) {
-        CURRENT_BACKOFF.remove(pos);
-        NEXT_ALLOWED_TICK.remove(pos);
+        if (pos != null) {
+            CURRENT_BACKOFF.remove(pos);
+            NEXT_ALLOWED_TICK.remove(pos);
+            AdjacentTargetCache.invalidate(pos);
+        }
     }
 
     public static synchronized void clear() {

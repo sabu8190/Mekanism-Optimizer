@@ -34,7 +34,7 @@ public final class OwnerChunkloadGate {
                 ServerPlayer player = server.getPlayerList().getPlayer(ownerUUID);
                 boolean isOnline = player != null;
                 if (!isOnline) {
-                    MekanismOptimizerLogger.recordChunkloadGated();
+                    MekanismOptimizerLogger.recordChunkloadSkip();
                     return false;
                 }
             }

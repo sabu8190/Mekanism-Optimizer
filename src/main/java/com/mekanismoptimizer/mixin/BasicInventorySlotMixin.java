@@ -1,5 +1,6 @@
 package com.mekanismoptimizer.mixin;
 
+import com.mekanismoptimizer.core.AdaptiveBackoffManager;
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
@@ -98,6 +99,7 @@ public abstract class BasicInventorySlotMixin {
             current.grow(toAdd);
             onContentsChanged();
         }
+        AdaptiveBackoffManager.wakeUp(this);
 
         if (stack.getCount() == toAdd) {
             cir.setReturnValue(ItemStack.EMPTY);

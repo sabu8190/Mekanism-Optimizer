@@ -21,6 +21,7 @@ public abstract class BoxedChemicalNetworkMixin {
         }
         // Safely skip only when stack is completely null or empty to prevent blocking AME addon machines
         if (stack == null || stack.isEmpty()) {
+            MekanismOptimizerLogger.recordNetEmitSkip();
             cir.setReturnValue(0L);
         }
     }

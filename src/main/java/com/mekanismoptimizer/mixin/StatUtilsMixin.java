@@ -1,7 +1,6 @@
 package com.mekanismoptimizer.mixin;
 
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
-import com.mekanismoptimizer.core.MekanismOptimizerLogger;
 import com.mekanismoptimizer.core.PoissonSampler;
 import mekanism.common.util.StatUtils;
 import org.spongepowered.asm.mixin.Mixin;

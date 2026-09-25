@@ -2,6 +2,7 @@ package com.mekanismoptimizer.mixin.addons;
 
 import astral_mekanism.generalrecipe.lookup.cache.recipe.CropSoilInputRecipeCache;
 import astral_mekanism.generalrecipe.recipe.CropSoilRecipe;
+import com.mekanismoptimizer.core.FastRecipeLookupCache;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -306,6 +307,9 @@ public abstract class CropSoilInputRecipeCacheMixin {
         mekanism_optimizer$buildFastCache(world);
         if (mekanism_optimizer$cacheBuilt) {
             CropSoilRecipe recipe = mekanism_optimizer$tripleRecipeMap.get(new CropSoilFluidKey(cropStack.getItem(), soilStack.getItem(), fluidStack.getFluid()));
+            if (recipe != null) {
+                FastRecipeLookupCache.putCropSoilRecipe(cropStack, soilStack, recipe);
+            }
             cir.setReturnValue(recipe);
         }
     }
@@ -320,6 +324,7 @@ public abstract class CropSoilInputRecipeCacheMixin {
         mekanism_optimizer$soilFluidPairs.clear();
         mekanism_optimizer$tripleRecipeMap.clear();
         mekanism_optimizer$cacheBuilt = false;
+        FastRecipeLookupCache.clear();
     }
 }
 

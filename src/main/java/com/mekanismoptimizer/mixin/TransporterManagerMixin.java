@@ -27,12 +27,12 @@ public abstract class TransporterManagerMixin {
     private static void onGetPredictedInsert(Coord4D position, Direction side, IItemHandler handler, TransitRequest request,
                                              Map<Coord4D, Set<TransporterStack>> additionalFlowingStacks,
                                              CallbackInfoReturnable<TransitRequest.TransitResponse> cir) {
-        if (!MekanismOptimizerConfig.ENABLE_FAST_SIMULATE.get() || handler == null || request == null || request.isEmpty()) {
+        if ((!MekanismOptimizerConfig.ENABLE_FAST_SIMULATE.get() && !MekanismOptimizerConfig.ENABLE_TRANSPORTER_CACHE.get()) || handler == null || request == null || request.isEmpty()) {
             return;
         }
 
         FastSlotIndexer indexer = FastSlotIndexer.get(handler);
-        if (indexer != null && !indexer.hasEmptySlot()) {
+        if (indexer != null && indexer.getSlotCount() > 0 && !indexer.hasEmptySlot()) {
             // Container is full: check if it contains any of the requested items
             boolean hasAnyMatch = false;
             for (TransitRequest.ItemData data : request.getItemData()) {
@@ -44,7 +44,7 @@ public abstract class TransporterManagerMixin {
 
             if (!hasAnyMatch) {
                 // Container cannot accept any of the requested items; fast exit
-                MekanismOptimizerLogger.recordMekanismSimulationSaved();
+                MekanismOptimizerLogger.recordPipeSimAvoided();
                 cir.setReturnValue(request.getEmptyResponse());
             }
         }

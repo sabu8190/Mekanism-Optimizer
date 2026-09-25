@@ -1,6 +1,5 @@
 package com.mekanismoptimizer.mixin;
 
-import com.mekanismoptimizer.core.MekanismOptimizerLogger;
 import com.mekanismoptimizer.core.MultiblockOptimizer;
 import mekanism.common.lib.multiblock.MultiblockData;
 import net.minecraft.world.level.Level;

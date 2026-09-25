@@ -52,9 +52,8 @@ public class MekanismOptimizer {
             // Flush coalesced packets to clients safely at tick boundary
             PacketCoalescer.flushPendingUpdates();
 
-            if (currentServerTick % 1200 == 0) { // Every 1 minute
-                MekanismOptimizerLogger.info(MekanismOptimizerLogger.getMetricsSummary());
-            }
+            // Periodic performance stats logger (configurable interval)
+            MekanismOptimizerLogger.checkAndLogStats();
         }
     }
 

@@ -33,7 +33,8 @@ public abstract class TileEntitySolarNeutronActivatorMixin {
         Level level = self.getLevel();
         long currentTick = level != null ? level.getGameTime() : 0;
 
-        if (currentTick - mekanism_optimizer$lastCheckTick < 20 && mekanism_optimizer$lastCheckTick >= 0) {
+        int ttl = MekanismOptimizerConfig.SOLAR_LIGHT_CACHE_TTL_TICKS.get();
+        if (currentTick - mekanism_optimizer$lastCheckTick < ttl && mekanism_optimizer$lastCheckTick >= 0) {
             MekanismOptimizerLogger.recordSolarCheckCached();
             cir.setReturnValue(mekanism_optimizer$cachedCanSeeSun);
             return;

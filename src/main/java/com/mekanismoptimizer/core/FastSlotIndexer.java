@@ -1,13 +1,8 @@
 package com.mekanismoptimizer.core;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
-
-import java.util.BitSet;
-import java.util.Map;
 
 /**
  * High-performance O(1) slot indexer for IItemHandler containers.
