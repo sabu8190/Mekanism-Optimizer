@@ -27,6 +27,13 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_CABLE_BACKOFF;
     public static final ForgeConfigSpec.BooleanValue ENABLE_LOOKING_AT_CACHE;
 
+    // Wind Generator & Machine Rendering Optimizations
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_OPTIMIZATION;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_RENDER_CULLING;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_TRANSMITTER_RENDER_OPTIMIZATION;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_FLUID_TANK_RENDER_OPTIMIZATION;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_ENERGY_CUBE_RENDER_OPTIMIZATION;
+
     // Dedicated File Logger
     public static final ForgeConfigSpec.BooleanValue ENABLE_DEDICATED_LOG_FILE;
 
@@ -36,6 +43,8 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.IntValue SOLAR_LIGHT_CACHE_TTL_TICKS;
     public static final ForgeConfigSpec.IntValue DYNAMIC_NETWORK_COOLDOWN_TICKS;
     public static final ForgeConfigSpec.IntValue LOG_INTERVAL_SECONDS;
+    public static final ForgeConfigSpec.IntValue WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS;
+    public static final ForgeConfigSpec.IntValue ENERGY_CUBE_POOL_CAPACITY;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -127,6 +136,31 @@ public final class MekanismOptimizerConfig {
                 .translation("mekanism_optimizer.config.enableLookingAtCache")
                 .define("enableLookingAtCache", true);
 
+        ENABLE_WIND_GENERATOR_OPTIMIZATION = builder
+                .comment("Enable O(1) height multiplier caching and adaptive skylight checks for Wind Generators to eliminate server tick allocations.")
+                .translation("mekanism_optimizer.config.enableWindGeneratorOptimization")
+                .define("enableWindGeneratorOptimization", true);
+
+        ENABLE_WIND_GENERATOR_RENDER_CULLING = builder
+                .comment("Enable frustum culling for Wind Generators to skip rendering and matrix math for off-screen/backside models.")
+                .translation("mekanism_optimizer.config.enableWindGeneratorRenderCulling")
+                .define("enableWindGeneratorRenderCulling", true);
+
+        ENABLE_TRANSMITTER_RENDER_OPTIMIZATION = builder
+                .comment("Enable zero-allocation model caching for pipes, cables, and tubes to eliminate stream/string allocations per frame.")
+                .translation("mekanism_optimizer.config.enableTransmitterRenderOptimization")
+                .define("enableTransmitterRenderOptimization", true);
+
+        ENABLE_FLUID_TANK_RENDER_OPTIMIZATION = builder
+                .comment("Enable fluid tank rendering cache and lookup optimizations.")
+                .translation("mekanism_optimizer.config.enableFluidTankRenderOptimization")
+                .define("enableFluidTankRenderOptimization", true);
+
+        ENABLE_ENERGY_CUBE_RENDER_OPTIMIZATION = builder
+                .comment("Enable energy cube rendering optimizations to reduce per-frame object allocations.")
+                .translation("mekanism_optimizer.config.enableEnergyCubeRenderOptimization")
+                .define("enableEnergyCubeRenderOptimization", true);
+
         ENABLE_DEDICATED_LOG_FILE = builder
                 .comment("Enable writing dedicated optimization and performance logs to logs/mekanism_optimizer.log.")
                 .translation("mekanism_optimizer.config.enableDedicatedLogFile")
@@ -161,6 +195,16 @@ public final class MekanismOptimizerConfig {
                 .comment("Interval in seconds for performance statistics logging (0 to disable).")
                 .translation("mekanism_optimizer.config.logIntervalSeconds")
                 .defineInRange("logIntervalSeconds", 60, 0, 3600);
+
+        WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS = builder
+                .comment("Interval in ticks between skylight occlusion checks for Wind Generators (default 100 ticks = 5s).")
+                .translation("mekanism_optimizer.config.windGeneratorSkyCheckIntervalTicks")
+                .defineInRange("windGeneratorSkyCheckIntervalTicks", 100, 10, 1200);
+
+        ENERGY_CUBE_POOL_CAPACITY = builder
+                .comment("Maximum capacity for pooled Energy Cube core LazyRender instances.")
+                .translation("mekanism_optimizer.config.energyCubePoolCapacity")
+                .defineInRange("energyCubePoolCapacity", 256, 16, 1024);
 
         builder.pop();
         SPEC = builder.build();

@@ -44,7 +44,13 @@
     "addons.GeneralCachedRecipeMixin",
     "addons.BlockEntityRecipeFactoryMixin"
   ],
-  "client": [],
+  "client": [
+    "generators.RenderWindGeneratorMixin",
+    "RenderTransmitterBaseMixin",
+    "RenderLogisticalTransporterMixin",
+    "RenderEnergyCubeMixin",
+    "RenderFluidTankMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1

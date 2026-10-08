@@ -34,4 +34,26 @@ public abstract class TileEntityWindGeneratorMixin {
             }
         }
     }
+
+    @Inject(method = "getMultiplier", at = @At("HEAD"), cancellable = true)
+    private void getMultiplierOptimized(org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<mekanism.api.math.FloatingLong> cir) {
+        if (!MekanismOptimizerConfig.ENABLE_WIND_GENERATOR_OPTIMIZATION.get()) {
+            return;
+        }
+
+        TileEntityMekanism self = (TileEntityMekanism) (Object) this;
+        cir.setReturnValue(com.mekanismoptimizer.core.FastWindGeneratorCache.getOptimizedMultiplier(self.getLevel(), self.getBlockPos()));
+    }
+
+    @Inject(method = "getRenderBoundingBox", at = @At("HEAD"), cancellable = true)
+    private void getRenderBoundingBoxOptimized(org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<net.minecraft.world.phys.AABB> cir) {
+        if (!MekanismOptimizerConfig.ENABLE_WIND_GENERATOR_RENDER_CULLING.get()) {
+            return;
+        }
+
+        TileEntityMekanism self = (TileEntityMekanism) (Object) this;
+        net.minecraft.core.BlockPos pos = self.getBlockPos();
+        // Fully enclose the 4.5 radius blade sweep and 10 block mast height to avoid any edge popping
+        cir.setReturnValue(new net.minecraft.world.phys.AABB(pos.offset(-4, 0, -4), pos.offset(5, 11, 5)));
+    }
 }

@@ -57,6 +57,7 @@ dependencies {
 
     // Mekanism compile-time reference
     compileOnly fg.deobf(fileTree(dir: 'libs', include: ['*.jar']))
+    testImplementation fg.deobf(fileTree(dir: 'libs', include: ['*.jar']))
 
     // Mixin annotation processor
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
