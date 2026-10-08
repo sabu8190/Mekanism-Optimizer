@@ -24,7 +24,7 @@ public abstract class RenderTransmitterBaseMixin<TRANSMITTER extends TileEntityT
     protected abstract void renderModel(TRANSMITTER transmitter, PoseStack matrix, VertexConsumer builder, float red, float green, float blue, float alpha, int light,
                                         int overlayLight, TextureAtlasSprite icon, List<String> visible);
 
-    @Inject(method = "renderModel(Lmekanism/common/tile/transmitter/TileEntityTransmitter;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IFILnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderModel(Lmekanism/common/tile/transmitter/TileEntityTransmitter;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IFIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V", at = @At("HEAD"), cancellable = true)
     private void renderModelOptimized(TRANSMITTER transmitter, PoseStack matrix, VertexConsumer builder, int rgb, float alpha, int light, int overlayLight,
                                       TextureAtlasSprite icon, CallbackInfo ci) {
         if (!MekanismOptimizerConfig.ENABLE_TRANSMITTER_RENDER_OPTIMIZATION.get()) {

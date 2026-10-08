@@ -47,7 +47,6 @@
   "client": [
     "generators.RenderWindGeneratorMixin",
     "RenderTransmitterBaseMixin",
-    "RenderLogisticalTransporterMixin",
     "RenderEnergyCubeMixin",
     "RenderFluidTankMixin"
   ],
