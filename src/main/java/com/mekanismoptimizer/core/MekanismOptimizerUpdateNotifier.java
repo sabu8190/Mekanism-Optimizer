@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Mekanism Optimizer 新バージョン自動更新通知エンジン (CurseForge & GitHub デュアルリンク対応)。
  */
 public class MekanismOptimizerUpdateNotifier {
-    public static final String CURRENT_VERSION = "1.2.3";
+    public static final String CURRENT_VERSION = "1.2.4";
     public static final String UPDATE_CHECK_URL = "https://raw.githubusercontent.com/sabu8190/Mekanism-Optimizer/main/update.json";
     public static final String CURSEFORGE_PAGE_URL = "https://www.curseforge.com/minecraft/mc-mods/mekanism-optimizer";
     public static final String GITHUB_RELEASE_URL = "https://github.com/sabu8190/Mekanism-Optimizer/releases";
