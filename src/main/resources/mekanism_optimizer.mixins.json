@@ -14,6 +14,7 @@
     "TileEntityDimensionalStabilizerMixin",
     "TileComponentEjectorMixin",
     "TileEntityUpdateableMixin",
+    "TileEntityMekanismMixin",
     "TileEntitySolarNeutronActivatorMixin",
     "TileEntityElectricPumpMixin",
     "EnergyNetworkMixin",
@@ -42,10 +43,19 @@
     "addons.EMExtraMoreMachineFactoryInputSlotMixin",
     "addons.OperationTrackerOptimizerAccessor",
     "addons.GeneralCachedRecipeMixin",
-    "addons.BlockEntityRecipeFactoryMixin"
+    "addons.BlockEntityRecipeFactoryMixin",
+    "addons.TileEntityCompressedWindGeneratorMixin",
+    "addons.CompactTileEntityGeneratorMixin",
+    "addons.TileEntityLargeWindGeneratorMixin"
   ],
   "client": [
+    "BlockEntityRenderDispatcherMixin",
+    "TileEntityMekanismClientMixin",
+    "SoundHandlerMixin",
     "generators.RenderWindGeneratorMixin",
+    "generators.ModelWindGeneratorMixin",
+    "addons.RenderCompressedWindGeneratorMixin",
+    "addons.RenderLargeWindGeneratorMixin",
     "RenderTransmitterBaseMixin",
     "RenderEnergyCubeMixin",
     "RenderFluidTankMixin"

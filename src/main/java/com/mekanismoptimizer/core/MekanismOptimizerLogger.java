@@ -37,6 +37,8 @@ public final class MekanismOptimizerLogger {
     private static final AtomicLong RADIATION_CHECKS_SAVED = new AtomicLong(0);
     private static final AtomicLong CABLE_BACKOFF_SKIPPED = new AtomicLong(0);
     private static final AtomicLong UNIT_DISPLAY_CACHED = new AtomicLong(0);
+    private static final AtomicLong WIND_GEN_RENDERED = new AtomicLong(0);
+    private static final AtomicLong WIND_GEN_LOD_CULLED = new AtomicLong(0);
 
     private static long lastLogTime = System.currentTimeMillis();
 
@@ -149,9 +151,11 @@ public final class MekanismOptimizerLogger {
     public static void recordRadiationCheckSaved() { RADIATION_CHECKS_SAVED.incrementAndGet(); }
     public static void recordCableBackoffSkipped() { CABLE_BACKOFF_SKIPPED.incrementAndGet(); }
     public static void recordUnitDisplayCached() { UNIT_DISPLAY_CACHED.incrementAndGet(); }
+    public static void recordWindGenRendered() { WIND_GEN_RENDERED.lazySet(WIND_GEN_RENDERED.get() + 1L); }
+    public static void recordWindGenLodCulled() { WIND_GEN_LOD_CULLED.lazySet(WIND_GEN_LOD_CULLED.get() + 1L); }
 
     public static String getMetricsSummary() {
-        return String.format("[MekanismOptimizer Stats] Pipe: %d | Backoff: %d | Poisson: %d | Solar: %d | Pump: %d | Net: %d | Packets: %d | Chunk: %d | Multi: %d | Factory: %d | MultiBlock: %d | Radiation: %d | Cable: %d | UnitDisplay: %d",
+        return String.format("[MekanismOptimizer Stats] Pipe: %d | Backoff: %d | Poisson: %d | Solar: %d | Pump: %d | Net: %d | Packets: %d | Chunk: %d | Multi: %d | Factory: %d | MultiBlock: %d | Radiation: %d | Cable: %d | UnitDisplay: %d | WindBaked: %d | WindCulled: %d",
                 PIPE_SIM_AVOIDED.get(),
                 BACKOFF_TICKS_SKIPPED.get(),
                 POISSON_O1_SAMPLES.get(),
@@ -165,7 +169,9 @@ public final class MekanismOptimizerLogger {
                 MULTIBLOCK_TICKS_OPTIMIZED.get(),
                 RADIATION_CHECKS_SAVED.get(),
                 CABLE_BACKOFF_SKIPPED.get(),
-                UNIT_DISPLAY_CACHED.get());
+                UNIT_DISPLAY_CACHED.get(),
+                WIND_GEN_RENDERED.get(),
+                WIND_GEN_LOD_CULLED.get());
     }
 
     public static void checkAndLogStats() {

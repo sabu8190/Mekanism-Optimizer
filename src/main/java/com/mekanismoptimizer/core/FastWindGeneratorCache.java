@@ -23,6 +23,9 @@ public final class FastWindGeneratorCache {
     // Cache computed height multiplier per (Dimension Key -> (Y coord -> FloatingLong))
     private static final Map<String, Int2ObjectMap<FloatingLong>> MULTIPLIER_CACHE = new ConcurrentHashMap<>();
 
+    // Cache computed compressed height multiplier per (Dimension Key -> (packed(topY, multiply) -> FloatingLong))
+    private static final Map<String, it.unimi.dsi.fastutil.longs.Long2ObjectMap<FloatingLong>> COMPRESSED_MULTIPLIER_CACHE = new ConcurrentHashMap<>();
+
     // Adaptive Skylight Scanner cache: packed BlockPos -> SkyCheckEntry
     private static final it.unimi.dsi.fastutil.longs.Long2ObjectMap<SkyCheckEntry> SKY_CACHE = new it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<>();
 
@@ -34,6 +37,9 @@ public final class FastWindGeneratorCache {
     private static Supplier<FloatingLong> windGenMinSupplier;
     private static Supplier<FloatingLong> windGenMaxSupplier;
 
+    private static volatile int cachedSkyCheckInterval = 100;
+    private static volatile long lastIntervalCheckTick = -1L;
+
     private FastWindGeneratorCache() {
     }
 
@@ -42,6 +48,7 @@ public final class FastWindGeneratorCache {
      */
     public static void clear() {
         MULTIPLIER_CACHE.clear();
+        COMPRESSED_MULTIPLIER_CACHE.clear();
         synchronized (SKY_CACHE) {
             SKY_CACHE.clear();
         }
@@ -123,12 +130,16 @@ public final class FastWindGeneratorCache {
         // Adaptive Skylight Scanner: check cached status to avoid heavy canSeeSky raycast every second
         long packedPos = worldPosition.asLong();
         long currentTick = level.getGameTime();
-        int interval = 100;
-        try {
-            if (MekanismOptimizerConfig.WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS != null) {
-                interval = MekanismOptimizerConfig.WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS.get();
+        int interval = cachedSkyCheckInterval;
+        if (currentTick - lastIntervalCheckTick >= 200L || currentTick < lastIntervalCheckTick) {
+            lastIntervalCheckTick = currentTick;
+            try {
+                if (MekanismOptimizerConfig.WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS != null) {
+                    interval = MekanismOptimizerConfig.WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS.get();
+                    cachedSkyCheckInterval = interval;
+                }
+            } catch (Throwable ignored) {
             }
-        } catch (Throwable ignored) {
         }
 
         SkyCheckEntry skyEntry;
@@ -157,7 +168,10 @@ public final class FastWindGeneratorCache {
         String dimKey = level.dimension().location().toString();
         Int2ObjectMap<FloatingLong> dimCache = MULTIPLIER_CACHE.computeIfAbsent(dimKey, k -> new Int2ObjectOpenHashMap<>());
 
-        FloatingLong cached = dimCache.get(topY);
+        FloatingLong cached;
+        synchronized (dimCache) {
+            cached = dimCache.get(topY);
+        }
         if (cached != null) {
             return cached;
         }
@@ -174,7 +188,9 @@ public final class FastWindGeneratorCache {
         float clampedY = Math.min(maxY, Math.max(minY, topY));
 
         if (minG.isZero() || maxY <= minY) {
-            dimCache.put(topY, FloatingLong.ZERO);
+            synchronized (dimCache) {
+                dimCache.put(topY, FloatingLong.ZERO);
+            }
             return FloatingLong.ZERO;
         }
 
@@ -182,7 +198,46 @@ public final class FastWindGeneratorCache {
         FloatingLong toGen = minG.add(slope.multiply(clampedY - minY));
         FloatingLong computed = toGen.divide(minG);
 
-        dimCache.put(topY, computed);
+        synchronized (dimCache) {
+            dimCache.put(topY, computed);
+        }
+        return computed;
+    }
+
+    /**
+     * Computes or returns the cached height * compression multiplier for Compact Mekanism Machines Wind Generators.
+     */
+    @NotNull
+    public static FloatingLong getOptimizedCompressedMultiplier(Level level, BlockPos worldPosition, long multiply) {
+        if (multiply <= 0L) {
+            return FloatingLong.ZERO;
+        }
+        FloatingLong baseMultiplier = getOptimizedMultiplier(level, worldPosition);
+        if (baseMultiplier.isZero()) {
+            return FloatingLong.ZERO;
+        }
+        if (multiply == 1L) {
+            return baseMultiplier;
+        }
+
+        int topY = worldPosition.getY() + 4;
+        long cacheKey = (((long) topY) << 40) ^ multiply;
+        String dimKey = level.dimension().location().toString();
+        it.unimi.dsi.fastutil.longs.Long2ObjectMap<FloatingLong> compCache =
+                COMPRESSED_MULTIPLIER_CACHE.computeIfAbsent(dimKey, k -> new it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<>());
+
+        FloatingLong cached;
+        synchronized (compCache) {
+            cached = compCache.get(cacheKey);
+        }
+        if (cached != null) {
+            return cached;
+        }
+
+        FloatingLong computed = baseMultiplier.multiply(multiply);
+        synchronized (compCache) {
+            compCache.put(cacheKey, computed);
+        }
         return computed;
     }
 }

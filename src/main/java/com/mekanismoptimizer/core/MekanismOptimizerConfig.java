@@ -30,6 +30,10 @@ public final class MekanismOptimizerConfig {
     // Wind Generator & Machine Rendering Optimizations
     public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_RENDER_CULLING;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_PREBAKED_MESHES;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_DIRECT_RENDERING;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_DISTANCE_LOD;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_ANGLE_THROTTLING;
     public static final ForgeConfigSpec.BooleanValue ENABLE_TRANSMITTER_RENDER_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_FLUID_TANK_RENDER_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_ENERGY_CUBE_RENDER_OPTIMIZATION;
@@ -45,6 +49,11 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.IntValue LOG_INTERVAL_SECONDS;
     public static final ForgeConfigSpec.IntValue WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS;
     public static final ForgeConfigSpec.IntValue ENERGY_CUBE_POOL_CAPACITY;
+    public static final ForgeConfigSpec.DoubleValue WIND_GENERATOR_LOD1_DISTANCE_BLOCKS;
+    public static final ForgeConfigSpec.DoubleValue WIND_GENERATOR_LOD2_DISTANCE_BLOCKS;
+    public static final ForgeConfigSpec.DoubleValue WIND_GENERATOR_CULL_DISTANCE_BLOCKS;
+    public static final ForgeConfigSpec.DoubleValue WIND_GENERATOR_MID_QUANTIZE_DEGREES;
+    public static final ForgeConfigSpec.DoubleValue WIND_GENERATOR_FAR_QUANTIZE_DEGREES;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -146,6 +155,26 @@ public final class MekanismOptimizerConfig {
                 .translation("mekanism_optimizer.config.enableWindGeneratorRenderCulling")
                 .define("enableWindGeneratorRenderCulling", true);
 
+        ENABLE_WIND_GENERATOR_PREBAKED_MESHES = builder
+                .comment("Enable pre-baked static mast/body and rigid rotor meshes for Wind Generators (reduces 21 matrix transforms per frame to 2).")
+                .translation("mekanism_optimizer.config.enableWindGeneratorPrebakedMeshes")
+                .define("enableWindGeneratorPrebakedMeshes", true);
+
+        ENABLE_WIND_GENERATOR_DIRECT_RENDERING = builder
+                .comment("Enable zero-allocation direct rendering for Wind Generators to eliminate per-frame capturing lambda allocations.")
+                .translation("mekanism_optimizer.config.enableWindGeneratorDirectRendering")
+                .define("enableWindGeneratorDirectRendering", true);
+
+        ENABLE_WIND_GENERATOR_DISTANCE_LOD = builder
+                .comment("Enable 3-tier distance-adaptive Level of Detail (LOD) and far-distance culling for Wind Generators.")
+                .translation("mekanism_optimizer.config.enableWindGeneratorDistanceLod")
+                .define("enableWindGeneratorDistanceLod", true);
+
+        ENABLE_WIND_GENERATOR_ANGLE_THROTTLING = builder
+                .comment("Enable rotation angle quantization/throttling for medium and far distance Wind Generators.")
+                .translation("mekanism_optimizer.config.enableWindGeneratorAngleThrottling")
+                .define("enableWindGeneratorAngleThrottling", true);
+
         ENABLE_TRANSMITTER_RENDER_OPTIMIZATION = builder
                 .comment("Enable zero-allocation model caching for pipes, cables, and tubes to eliminate stream/string allocations per frame.")
                 .translation("mekanism_optimizer.config.enableTransmitterRenderOptimization")
@@ -205,6 +234,31 @@ public final class MekanismOptimizerConfig {
                 .comment("Maximum capacity for pooled Energy Cube core LazyRender instances.")
                 .translation("mekanism_optimizer.config.energyCubePoolCapacity")
                 .defineInRange("energyCubePoolCapacity", 256, 16, 1024);
+
+        WIND_GENERATOR_LOD1_DISTANCE_BLOCKS = builder
+                .comment("Distance threshold in blocks for switching Wind Generators to LOD 1 (medium detail, omitting sub-pixel wires/plates/secondary blades).")
+                .translation("mekanism_optimizer.config.windGeneratorLod1DistanceBlocks")
+                .defineInRange("windGeneratorLod1DistanceBlocks", 24.0D, 8.0D, 128.0D);
+
+        WIND_GENERATOR_LOD2_DISTANCE_BLOCKS = builder
+                .comment("Distance threshold in blocks for switching Wind Generators to LOD 2 (far detail, core mast and primary 3 blades only).")
+                .translation("mekanism_optimizer.config.windGeneratorLod2DistanceBlocks")
+                .defineInRange("windGeneratorLod2DistanceBlocks", 48.0D, 16.0D, 192.0D);
+
+        WIND_GENERATOR_CULL_DISTANCE_BLOCKS = builder
+                .comment("Maximum distance in blocks beyond which Wind Generator rendering is completely culled.")
+                .translation("mekanism_optimizer.config.windGeneratorCullDistanceBlocks")
+                .defineInRange("windGeneratorCullDistanceBlocks", 80.0D, 16.0D, 256.0D);
+
+        WIND_GENERATOR_MID_QUANTIZE_DEGREES = builder
+                .comment("Rotation angle quantization step in degrees for medium-distance (LOD 1) Wind Generators.")
+                .translation("mekanism_optimizer.config.windGeneratorMidQuantizeDegrees")
+                .defineInRange("windGeneratorMidQuantizeDegrees", 8.0D, 0.25D, 45.0D);
+
+        WIND_GENERATOR_FAR_QUANTIZE_DEGREES = builder
+                .comment("Rotation angle quantization step in degrees for far-distance (LOD 2) Wind Generators.")
+                .translation("mekanism_optimizer.config.windGeneratorFarQuantizeDegrees")
+                .defineInRange("windGeneratorFarQuantizeDegrees", 12.0D, 0.25D, 90.0D);
 
         builder.pop();
         SPEC = builder.build();

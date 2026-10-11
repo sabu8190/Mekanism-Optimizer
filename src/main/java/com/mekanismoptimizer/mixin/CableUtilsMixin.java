@@ -19,6 +19,17 @@ import java.util.Set;
 @Mixin(value = CableUtils.class, remap = false)
 public abstract class CableUtilsMixin {
 
+    @Inject(method = "emit(Ljava/util/Set;Lmekanism/api/energy/IEnergyContainer;Lnet/minecraft/world/level/block/entity/BlockEntity;Lmekanism/api/math/FloatingLong;)V", at = @At("HEAD"), cancellable = true)
+    private static void onEmitContainer(Set<Direction> outputSides, mekanism.api.energy.IEnergyContainer energyContainer, BlockEntity from, FloatingLong maxOutput, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        if (!MekanismOptimizerConfig.ENABLE_CABLE_BACKOFF.get() || from == null || energyContainer == null || energyContainer.isEmpty() || maxOutput == null || maxOutput.isZero() || outputSides == null || outputSides.isEmpty()) {
+            return;
+        }
+        if (AdaptiveBackoffManager.shouldBackoff(from)) {
+            MekanismOptimizerLogger.recordCableBackoffSkipped();
+            ci.cancel();
+        }
+    }
+
     @Inject(method = "emit(Ljava/util/Set;Lmekanism/api/math/FloatingLong;Lnet/minecraft/world/level/block/entity/BlockEntity;)Lmekanism/api/math/FloatingLong;", at = @At("HEAD"), cancellable = true)
     private static void onEmit(Set<Direction> sides, FloatingLong energyToSend, BlockEntity from, CallbackInfoReturnable<FloatingLong> cir) {
         if (!MekanismOptimizerConfig.ENABLE_CABLE_BACKOFF.get() || from == null || energyToSend == null || energyToSend.isZero() || sides == null || sides.isEmpty()) {
