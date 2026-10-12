@@ -20,7 +20,6 @@ public abstract class EMExtraMoreMachineFactoryOutputSlotMixin {
      */
     @Inject(method = "getLimit", at = @At("HEAD"), cancellable = true, remap = false, require = 0)
     private void onGetLimitSafe(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-        int baseLimit = stack.isEmpty() ? 64 : stack.getMaxStackSize();
         // Default safe fallback multiplier if tier is high
         cir.setReturnValue(Integer.MAX_VALUE);
     }

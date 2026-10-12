@@ -3,7 +3,6 @@ package com.mekanismoptimizer;
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
 import com.mekanismoptimizer.core.MekanismOptimizerLogger;
 import com.mekanismoptimizer.core.PacketCoalescer;
-import com.mekanismoptimizer.core.ParallelWorkerPool;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -16,7 +15,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Mod(MekanismOptimizer.MODID)
 public class MekanismOptimizer {
     public static final String MODID = "mekanism_optimizer";
-    private static long currentServerTick = 0;
 
     public MekanismOptimizer() {
         ModLoadingContext.get().registerExtensionPoint(net.minecraftforge.fml.IExtensionPoint.DisplayTest.class,
@@ -40,13 +38,12 @@ public class MekanismOptimizer {
 
     private void setup(final FMLCommonSetupEvent event) {
         com.mekanismoptimizer.core.FastRecipeLookupCache.init();
-        MekanismOptimizerLogger.info("Mekanism Optimizer initialized with " + ParallelWorkerPool.getThreadCount() + " worker threads.");
+        MekanismOptimizerLogger.info("Mekanism Optimizer initialized.");
     }
 
     @SubscribeEvent
     public void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            currentServerTick++;
             com.mekanismoptimizer.core.AdaptiveBackoffManager.onServerTick();
 
             // Flush coalesced packets to clients safely at tick boundary
@@ -55,9 +52,5 @@ public class MekanismOptimizer {
             // Periodic performance stats logger (configurable interval)
             MekanismOptimizerLogger.checkAndLogStats();
         }
-    }
-
-    public static long getCurrentServerTick() {
-        return currentServerTick;
     }
 }

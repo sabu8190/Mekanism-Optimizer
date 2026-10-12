@@ -33,7 +33,6 @@ public abstract class EssentialSmeltingCachedRecipeMixin {
     @Shadow private ItemStack recipeInput;
     @Shadow private ItemInfuseOutput recipeOutput;
 
-    @Unique private long mekanism_optimizer$lastXp = -1;
     @Unique private int mekanism_optimizer$lastXpUpgrade = -1;
     @Unique private InfusionStack mekanism_optimizer$cachedXpStack = InfusionStack.EMPTY;
     @Unique private ItemStack mekanism_optimizer$cachedResultItem = ItemStack.EMPTY;
@@ -64,7 +63,6 @@ public abstract class EssentialSmeltingCachedRecipeMixin {
         if (currentUpgrade != mekanism_optimizer$lastXpUpgrade || mekanism_optimizer$cachedResultItem.isEmpty()) {
             mekanism_optimizer$lastXpUpgrade = currentUpgrade;
             long xp = (long) (recipe.getExperience() * 100 * (1L << (currentUpgrade * 2)));
-            mekanism_optimizer$lastXp = xp;
             mekanism_optimizer$cachedXpStack = xp <= 0 ? InfusionStack.EMPTY : AMEInfuseTypes.XP.getStack(xp);
             mekanism_optimizer$cachedResultItem = recipe.getResultItem(null);
             this.recipeOutput = new ItemInfuseOutput(mekanism_optimizer$cachedResultItem, mekanism_optimizer$cachedXpStack);

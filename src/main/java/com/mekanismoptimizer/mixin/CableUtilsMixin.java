@@ -1,8 +1,12 @@
 package com.mekanismoptimizer.mixin;
 
 import com.mekanismoptimizer.core.AdaptiveBackoffManager;
+import com.mekanismoptimizer.core.FastWindGeneratorCache;
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
 import com.mekanismoptimizer.core.MekanismOptimizerLogger;
+import mekanism.api.Action;
+import mekanism.api.AutomationType;
+import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.util.CableUtils;
 import net.minecraft.core.Direction;
@@ -11,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
@@ -20,12 +25,24 @@ import java.util.Set;
 public abstract class CableUtilsMixin {
 
     @Inject(method = "emit(Ljava/util/Set;Lmekanism/api/energy/IEnergyContainer;Lnet/minecraft/world/level/block/entity/BlockEntity;Lmekanism/api/math/FloatingLong;)V", at = @At("HEAD"), cancellable = true)
-    private static void onEmitContainer(Set<Direction> outputSides, mekanism.api.energy.IEnergyContainer energyContainer, BlockEntity from, FloatingLong maxOutput, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
-        if (!MekanismOptimizerConfig.ENABLE_CABLE_BACKOFF.get() || from == null || energyContainer == null || energyContainer.isEmpty() || maxOutput == null || maxOutput.isZero() || outputSides == null || outputSides.isEmpty()) {
+    private static void onEmitContainer(Set<Direction> outputSides, IEnergyContainer energyContainer, BlockEntity from, FloatingLong maxOutput, CallbackInfo ci) {
+        if (from == null || energyContainer == null || energyContainer.isEmpty() || maxOutput == null || maxOutput.isZero() || outputSides == null || outputSides.isEmpty()) {
             return;
         }
-        if (AdaptiveBackoffManager.shouldBackoff(from)) {
+        if (MekanismOptimizerConfig.ENABLE_CABLE_BACKOFF.get() && AdaptiveBackoffManager.shouldBackoff(from)) {
             MekanismOptimizerLogger.recordCableBackoffSkipped();
+            ci.cancel();
+            return;
+        }
+        if (MekanismOptimizerConfig.ENABLE_ADAPTIVE_BACKOFF.get() && FastWindGeneratorCache.isBatchedWindGenerator(from)) {
+            FloatingLong batchMax = FastWindGeneratorCache.getEightTicksMaxOutput(maxOutput);
+            FloatingLong toSend = energyContainer.extract(batchMax, Action.SIMULATE, AutomationType.INTERNAL);
+            if (!toSend.isZero()) {
+                FloatingLong emitted = CableUtils.emit(outputSides, toSend, from);
+                if (!emitted.isZero()) {
+                    energyContainer.extract(emitted, Action.EXECUTE, AutomationType.INTERNAL);
+                }
+            }
             ci.cancel();
         }
     }

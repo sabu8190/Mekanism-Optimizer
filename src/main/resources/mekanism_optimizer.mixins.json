@@ -6,9 +6,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "mekanism_optimizer.refmap.json",
   "mixins": [
-    "InventoryNetworkMixin",
     "TransporterManagerMixin",
-    "TransporterPathfinderMixin",
     "StatUtilsMixin",
     "TileComponentChunkLoaderMixin",
     "TileEntityDimensionalStabilizerMixin",
@@ -51,6 +49,8 @@
   "client": [
     "BlockEntityRenderDispatcherMixin",
     "TileEntityMekanismClientMixin",
+    "TileEntityTransmitterMixin",
+    "TileEntityBoundingBlockMixin",
     "SoundHandlerMixin",
     "generators.RenderWindGeneratorMixin",
     "generators.ModelWindGeneratorMixin",

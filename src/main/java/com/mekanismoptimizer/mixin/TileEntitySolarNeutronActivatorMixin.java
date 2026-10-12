@@ -25,7 +25,7 @@ public abstract class TileEntitySolarNeutronActivatorMixin {
 
     @Inject(method = "canSeeSun", at = @At("HEAD"), cancellable = true)
     private void onCanSeeSun(CallbackInfoReturnable<Boolean> cir) {
-        if (!MekanismOptimizerConfig.ENABLE_SOLAR_CACHE.get()) {
+        if (!MekanismOptimizerConfig.ENABLE_SOLAR_LIGHT_CACHE.get()) {
             return;
         }
 

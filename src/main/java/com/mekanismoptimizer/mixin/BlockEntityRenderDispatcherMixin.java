@@ -11,15 +11,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Intercepts BlockEntityRenderDispatcher.render (m_112267_) at priority 1100 (after EntityCulling)
- * to render Wind Generators directly, bypassing:
- * 1. ImmutableMap.get(blockEntity.getType()) renderer lookup (6,966x/frame)
- * 2. BlockEntityType.isValid(blockState) set lookup (6,966x/frame)
- * 3. tryRender capturing Runnable lambda allocation (6,966x/frame)
- * 4. Per-frame LevelRenderer.getLightColor chunk light engine lookups (replaced with a 16,384-slot 32-tick spatial cache)
- * 5. MekanismTileEntityRenderer profiler.push/pop overhead (6,966x/frame)
+ * Intercepts BlockEntityRenderDispatcher.render (m_112267_) at priority 800 (before EntityCulling)
+ * to render Wind Generators and distance-cull Transmitters directly, bypassing:
+ * 1. EntityCulling getRenderer(blockEntity) + shouldRenderOffScreen + System.currentTimeMillis() (13,932x/frame)
+ * 2. ImmutableMap.get(blockEntity.getType()) renderer lookup (13,932x/frame)
+ * 3. BlockEntityType.isValid(blockState) set lookup (13,932x/frame)
+ * 4. tryRender capturing Runnable lambda allocation (13,932x/frame)
+ * 5. Per-frame LevelRenderer.getLightColor chunk light engine lookups (replaced with a 16,384-slot 32-tick spatial cache)
+ * 6. MekanismTileEntityRenderer profiler.push/pop overhead (13,932x/frame)
  */
-@Mixin(value = BlockEntityRenderDispatcher.class, priority = 1100, remap = false)
+@Mixin(value = BlockEntityRenderDispatcher.class, priority = 800, remap = false)
 public abstract class BlockEntityRenderDispatcherMixin {
 
     @Inject(

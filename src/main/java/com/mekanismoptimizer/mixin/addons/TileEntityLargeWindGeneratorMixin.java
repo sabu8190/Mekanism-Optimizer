@@ -62,10 +62,6 @@ public abstract class TileEntityLargeWindGeneratorMixin {
 
     @Inject(method = "getRenderBoundingBox()Lnet/minecraft/world/phys/AABB;", at = @At("HEAD"), cancellable = true, remap = false)
     private void getRenderBoundingBoxOptimized(CallbackInfoReturnable<AABB> cir) {
-        if (!FastWindGeneratorRenderer.isRenderCullingEnabled()) {
-            return;
-        }
-
         TileEntityMekanism self = (TileEntityMekanism) (Object) this;
         BlockPos pos = self.getBlockPos();
         AABB box = this.mekOpti$cachedRenderBox;
