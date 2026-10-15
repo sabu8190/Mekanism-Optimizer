@@ -1,10 +1,12 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/mekanism-optimizer",
   "promoted": {
-    "1.20.1-latest": "1.3.1",
-    "1.20.1-recommended": "1.3.1"
+    "1.20.1-latest": "1.3.3",
+    "1.20.1-recommended": "1.3.3"
   },
   "1.20.1": {
+    "1.3.3": "Hotfix 1.3.3 - Fundamental overhaul: completely eliminate machine recipe lookup collisions and pipe network emission regressions, restoring 100% native Mekanism pipe & machine I/O functionality",
+    "1.3.2": "Hotfix 1.3.2 - Fix standard pipe routing & machine input/output auto-ejection regressions",
     "1.3.1": "Hotfix 1.3.1 - Transmitter Inner-Glow Distance Culling, Cached Transmitter/BoundingBlock AABBs, Priority-800 EntityCulling Bypass, 8-Tick Batched Cable Wind Generation & MAI Optional Mixin Guards",
     "1.3.0": "Release 1.3.0 - Pre-Baked View-Space Wind Generator Renderer, 3-Tier LOD, Direct Dispatcher Interception & Spatial Light Cache",
     "1.2.4": "Release 1.2.4 - Machine Rendering Frustum Culling & Wind Generator O(1) Optimizations",

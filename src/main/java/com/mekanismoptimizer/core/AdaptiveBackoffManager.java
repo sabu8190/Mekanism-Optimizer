@@ -76,7 +76,6 @@ public class AdaptiveBackoffManager {
         if (pos != null) {
             CURRENT_BACKOFF.remove(pos);
             NEXT_ALLOWED_TICK.remove(pos);
-            AdjacentTargetCache.invalidate(pos);
         }
     }
 

@@ -11,27 +11,22 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Intercepts BlockEntityRenderDispatcher.render (m_112267_) at priority 800 (before EntityCulling)
- * to render Wind Generators and distance-cull Transmitters directly, bypassing:
- * 1. EntityCulling getRenderer(blockEntity) + shouldRenderOffScreen + System.currentTimeMillis() (13,932x/frame)
- * 2. ImmutableMap.get(blockEntity.getType()) renderer lookup (13,932x/frame)
- * 3. BlockEntityType.isValid(blockState) set lookup (13,932x/frame)
- * 4. tryRender capturing Runnable lambda allocation (13,932x/frame)
- * 5. Per-frame LevelRenderer.getLightColor chunk light engine lookups (replaced with a 16,384-slot 32-tick spatial cache)
- * 6. MekanismTileEntityRenderer profiler.push/pop overhead (13,932x/frame)
+ * Intercepts BlockEntityRenderDispatcher.render at priority 800 (before EntityCulling)
+ * to render Wind Generators directly, bypassing:
+ * 1. EntityCulling getRenderer(blockEntity) + shouldRenderOffScreen + System.currentTimeMillis()
+ * 2. ImmutableMap.get(blockEntity.getType()) renderer lookup
+ * 3. BlockEntityType.isValid(blockState) set lookup
+ * 4. tryRender capturing Runnable lambda allocation
+ * 5. Per-frame LevelRenderer.getLightColor chunk light engine lookups
+ * 6. MekanismTileEntityRenderer profiler.push/pop overhead
  */
-@Mixin(value = BlockEntityRenderDispatcher.class, priority = 800, remap = false)
+@Mixin(value = BlockEntityRenderDispatcher.class, priority = 800)
 public abstract class BlockEntityRenderDispatcherMixin {
 
     @Inject(
-            method = {
-                    "m_112267_(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
-                    "render(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"
-            },
+            method = "render(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
             at = @At("HEAD"),
-            cancellable = true,
-            remap = false,
-            require = 0
+            cancellable = true
     )
     private <E extends BlockEntity> void renderWindGeneratorFast(
             E blockEntity,

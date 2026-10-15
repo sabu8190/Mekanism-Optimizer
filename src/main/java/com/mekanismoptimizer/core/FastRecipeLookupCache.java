@@ -2,7 +2,6 @@ package com.mekanismoptimizer.core;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -11,9 +10,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Cache for complex recipe lookups (e.g. Astral Mekanism Greenhouse crop-soil pairs).
+ */
 public final class FastRecipeLookupCache {
 
-    private static final Map<Item, Object> SINGLE_ITEM_RECIPE_CACHE = new ConcurrentHashMap<>(1024);
     private static final Object NEGATIVE_CACHE_SENTINEL = new Object();
 
     // Astral Mekanism CropSoil pair cache (CropItem, SoilItem -> Recipe)
@@ -33,8 +34,8 @@ public final class FastRecipeLookupCache {
     }
 
     public static void clear() {
-        SINGLE_ITEM_RECIPE_CACHE.clear();
         CROP_SOIL_RECIPE_CACHE.clear();
+        AdaptiveBackoffManager.clear();
         MekanismOptimizerLogger.info("FastRecipeLookupCache flushed.");
     }
 
@@ -46,32 +47,6 @@ public final class FastRecipeLookupCache {
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         clear();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <R> R getSingleItemRecipe(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return null;
-        }
-        Item item = stack.getItem();
-        if (item == Items.AIR) {
-            return null;
-        }
-        Object cached = SINGLE_ITEM_RECIPE_CACHE.get(item);
-        if (cached == NEGATIVE_CACHE_SENTINEL) {
-            return null;
-        }
-        return (R) cached;
-    }
-
-    public static void putSingleItemRecipe(ItemStack stack, Object recipe) {
-        if (stack.isEmpty()) {
-            return;
-        }
-        Item item = stack.getItem();
-        if (item != Items.AIR) {
-            SINGLE_ITEM_RECIPE_CACHE.put(item, recipe != null ? recipe : NEGATIVE_CACHE_SENTINEL);
-        }
     }
 
     @SuppressWarnings("unchecked")

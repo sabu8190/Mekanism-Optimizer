@@ -2,7 +2,6 @@ package com.mekanismoptimizer;
 
 import com.mekanismoptimizer.core.MekanismOptimizerConfig;
 import com.mekanismoptimizer.core.MekanismOptimizerLogger;
-import com.mekanismoptimizer.core.PacketCoalescer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -45,9 +44,6 @@ public class MekanismOptimizer {
     public void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             com.mekanismoptimizer.core.AdaptiveBackoffManager.onServerTick();
-
-            // Flush coalesced packets to clients safely at tick boundary
-            PacketCoalescer.flushPendingUpdates();
 
             // Periodic performance stats logger (configurable interval)
             MekanismOptimizerLogger.checkAndLogStats();

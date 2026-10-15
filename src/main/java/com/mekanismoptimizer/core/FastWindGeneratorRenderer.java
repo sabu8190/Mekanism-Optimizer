@@ -4,14 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
-import mekanism.common.content.network.EnergyNetwork;
-import mekanism.common.content.network.transmitter.LogisticalTransporterBase;
-import mekanism.common.content.network.transmitter.UniversalCable;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mekanism.common.tile.transmitter.TileEntityDiversionTransporter;
-import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
-import mekanism.common.tile.transmitter.TileEntityTransmitter;
-import mekanism.common.tile.transmitter.TileEntityUniversalCable;
 import mekanism.generators.common.tile.TileEntityWindGenerator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
@@ -114,7 +107,6 @@ public final class FastWindGeneratorRenderer {
     private static boolean cfgUseDirect = true;
     private static boolean cfgUseLod = true;
     private static boolean cfgUseAngleThrottling = true;
-    private static boolean cfgTransmitterOpt = true;
     private static double cfgCullDistSq = 80.0D * 80.0D;
     private static double cfgLod1DistSq = 12.0D * 12.0D;
     private static double cfgLod2DistSq = 20.0D * 20.0D;
@@ -136,7 +128,6 @@ public final class FastWindGeneratorRenderer {
             cfgUseDirect = MekanismOptimizerConfig.ENABLE_WIND_GENERATOR_DIRECT_RENDERING.get();
             cfgUseLod = MekanismOptimizerConfig.ENABLE_WIND_GENERATOR_DISTANCE_LOD.get();
             cfgUseAngleThrottling = MekanismOptimizerConfig.ENABLE_WIND_GENERATOR_ANGLE_THROTTLING.get();
-            cfgTransmitterOpt = MekanismOptimizerConfig.ENABLE_TRANSMITTER_RENDER_OPTIMIZATION.get();
             double cullDist = MekanismOptimizerConfig.WIND_GENERATOR_CULL_DISTANCE_BLOCKS.get();
             double lod1Dist = Math.min(12.0D, MekanismOptimizerConfig.WIND_GENERATOR_LOD1_DISTANCE_BLOCKS.get());
             double lod2Dist = Math.min(20.0D, MekanismOptimizerConfig.WIND_GENERATOR_LOD2_DISTANCE_BLOCKS.get());
@@ -198,8 +189,6 @@ public final class FastWindGeneratorRenderer {
 
         if (tileCls == lastFastTileClass && (baked = lastFastTileBaked) != null) {
             heightOffset = lastFastTileHeightOffset;
-        } else if (blockEntity instanceof TileEntityTransmitter transmitterTile) {
-            return shouldSkipTransmitterRender(transmitterTile, poseStack);
         } else if (tileCls == lastNonWindTileClass) {
             return false;
         } else {
@@ -260,49 +249,6 @@ public final class FastWindGeneratorRenderer {
 
         MekanismOptimizerLogger.recordWindGenRendered();
         return true;
-    }
-
-    /**
-     * Ultra-fast transmitter inner-contents culling at the head of BlockEntityRenderDispatcher.render (priority 800).
-     * Note that physical cable/pipe/tube/conductor blocks are static baked chunk models rendered by Embeddium at all distances;
-     * the BlockEntityRenderer only draws the 2-pixel inner window overlay into Sheets.translucentCullBlockSheet()
-     * (which otherwise forces CPU depth-sorting of 120,000+ translucent quads every frame across dense cable grids).
-     */
-    private static boolean shouldSkipTransmitterRender(TileEntityTransmitter transmitterTile, PoseStack poseStack) {
-        if (!cfgTransmitterOpt) {
-            return false;
-        }
-        final Matrix4f pm = poseStack.last().pose();
-        final float tx = pm.m30() + 0.5F;
-        final float ty = pm.m31() + 0.5F;
-        final float tz = pm.m32() + 0.5F;
-        final float distSq = tx * tx + ty * ty + tz * tz;
-
-        if (transmitterTile instanceof TileEntityLogisticalTransporterBase transporterTile) {
-            if (transporterTile instanceof TileEntityDiversionTransporter) {
-                return distSq > 256.0F;
-            }
-            if (distSq > 576.0F) {
-                return true;
-            }
-            LogisticalTransporterBase transporter = transporterTile.getTransmitter();
-            return transporter == null || transporter.getTransit().isEmpty();
-        }
-
-        // Cull 2-pixel inner window overlay beyond 8 blocks (distSq > 64.0F)
-        if (distSq > 64.0F) {
-            return true;
-        }
-
-        if (transmitterTile instanceof TileEntityUniversalCable cableTile) {
-            UniversalCable cable = cableTile.getTransmitter();
-            if (cable == null || !cable.hasTransmitterNetwork()) {
-                return true;
-            }
-            EnergyNetwork network = cable.getTransmitterNetwork();
-            return network == null || network.currentScale <= 0.0F;
-        }
-        return false;
     }
 
     /**
