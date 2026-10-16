@@ -1,10 +1,11 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/mekanism-optimizer",
   "promoted": {
-    "1.20.1-latest": "1.3.4",
-    "1.20.1-recommended": "1.3.4"
+    "1.20.1-latest": "1.4.0",
+    "1.20.1-recommended": "1.4.0"
   },
   "1.20.1": {
+    "1.4.0": "Release 1.4.0 - Universal factory auto-sort balancing engine, reliable Astral Mekanism cobblestone supply upgrade insertion, and complete dead code & config synchronization",
     "1.3.4": "Hotfix 1.3.4 - Fix Astral Mekanism cobblestone supply upgrade insertion and factory auto-sorting balancing",
     "1.3.3": "Hotfix 1.3.3 - Fundamental overhaul: completely eliminate machine recipe lookup collisions and pipe network emission regressions, restoring 100% native Mekanism pipe & machine I/O functionality",
     "1.3.2": "Hotfix 1.3.2 - Fix standard pipe routing & machine input/output auto-ejection regressions",
