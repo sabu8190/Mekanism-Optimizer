@@ -64,11 +64,16 @@ public abstract class TileEntityWindGeneratorMixin {
 
         List<IEnergyContainer> containers = self.getEnergyContainers(null);
         IEnergyContainer container = (containers != null && !containers.isEmpty()) ? containers.get(0) : null;
-        if (container != null && container.getNeeded().isZero()) {
-            if (AdaptiveBackoffManager.shouldBackoff(self)) {
-                MekanismOptimizerLogger.recordBackoffSkipped();
-                ci.cancel();
-                return;
+        if (container != null) {
+            if (container.getNeeded().isZero()) {
+                if (AdaptiveBackoffManager.shouldBackoff(self)) {
+                    MekanismOptimizerLogger.recordBackoffSkipped();
+                    ci.cancel();
+                    return;
+                }
+                AdaptiveBackoffManager.recordFailure(self);
+            } else {
+                AdaptiveBackoffManager.recordSuccess(self);
             }
         }
 

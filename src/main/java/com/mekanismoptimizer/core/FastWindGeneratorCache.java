@@ -243,10 +243,6 @@ public final class FastWindGeneratorCache {
 
     private static volatile FloatingLong lastMultRef;
     private static volatile FloatingLong lastSevenTicksGen;
-    private static volatile FloatingLong lastMaxOutputRef;
-    private static volatile FloatingLong lastEightTicksMaxOutput;
-    private static volatile Class<?> batchedWindClass1;
-    private static volatile Class<?> batchedWindClass2;
 
     /**
      * Returns 7 ticks' worth of wind generation (7 * windGenerationMin * currentMultiplier) with O(1) reference caching.
@@ -268,49 +264,6 @@ public final class FastWindGeneratorCache {
         lastMultRef = currentMultiplier;
         lastSevenTicksGen = gen7;
         return gen7;
-    }
-
-    /**
-     * Returns 8 ticks' worth of maxOutput (8 * maxOutput) with O(1) caching for batched cable emission.
-     */
-    @NotNull
-    public static FloatingLong getEightTicksMaxOutput(FloatingLong maxOutput) {
-        if (maxOutput == null || maxOutput.isZero()) {
-            return FloatingLong.ZERO;
-        }
-        FloatingLong prevRef = lastMaxOutputRef;
-        FloatingLong prevOut = lastEightTicksMaxOutput;
-        if (prevOut != null && (maxOutput == prevRef || maxOutput.equals(prevRef))) {
-            return prevOut;
-        }
-        FloatingLong out8 = maxOutput.multiply(8L);
-        lastMaxOutputRef = maxOutput;
-        lastEightTicksMaxOutput = out8;
-        return out8;
-    }
-
-    /**
-     * Fast O(1) pointer check to identify Wind Generators participating in 8-tick server batching.
-     */
-    public static boolean isBatchedWindGenerator(net.minecraft.world.level.block.entity.BlockEntity tile) {
-        if (tile == null) {
-            return false;
-        }
-        Class<?> cls = tile.getClass();
-        if (cls == batchedWindClass1 || cls == batchedWindClass2) {
-            return true;
-        }
-        String name = cls.getName();
-        if (name.equals("mekanism.generators.common.tile.TileEntityWindGenerator")
-                || name.equals("com.CompactMekanismMachines.common.tile.TileEntityCompressedWindGenerator")) {
-            if (batchedWindClass1 == null) {
-                batchedWindClass1 = cls;
-            } else {
-                batchedWindClass2 = cls;
-            }
-            return true;
-        }
-        return false;
     }
 }
 

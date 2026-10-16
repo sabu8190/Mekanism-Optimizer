@@ -5,14 +5,9 @@ import net.minecraftforge.common.ForgeConfigSpec;
 public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue ENABLE_TRANSPORTER_CACHE;
     public static final ForgeConfigSpec.BooleanValue ENABLE_FAST_POISSON_SAMPLER;
     public static final ForgeConfigSpec.BooleanValue ENABLE_ADAPTIVE_BACKOFF;
     public static final ForgeConfigSpec.BooleanValue ENABLE_SOLAR_LIGHT_CACHE;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_PUMP_BACKOFF;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_NETWORK_EMIT_OPTIMIZATION;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_FAST_SIMULATE;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_PACKET_COALESCING;
     public static final ForgeConfigSpec.BooleanValue ENABLE_OWNER_CHUNKLOAD_GATING;
     public static final ForgeConfigSpec.BooleanValue ENABLE_FACTORY_AUTO_SORT_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_MULTIBLOCK_OPTIMIZATION;
@@ -28,15 +23,12 @@ public final class MekanismOptimizerConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_DIRECT_RENDERING;
     public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_DISTANCE_LOD;
     public static final ForgeConfigSpec.BooleanValue ENABLE_WIND_GENERATOR_ANGLE_THROTTLING;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_TRANSMITTER_RENDER_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_FLUID_TANK_RENDER_OPTIMIZATION;
     public static final ForgeConfigSpec.BooleanValue ENABLE_ENERGY_CUBE_RENDER_OPTIMIZATION;
 
     // Dedicated File Logger
     public static final ForgeConfigSpec.BooleanValue ENABLE_DEDICATED_LOG_FILE;
 
-    public static final ForgeConfigSpec.IntValue ITEM_EJECT_TICK_DELAY;
-    public static final ForgeConfigSpec.IntValue MAX_BACKOFF_TICKS;
     public static final ForgeConfigSpec.IntValue SOLAR_LIGHT_CACHE_TTL_TICKS;
     public static final ForgeConfigSpec.IntValue LOG_INTERVAL_SECONDS;
     public static final ForgeConfigSpec.IntValue WIND_GENERATOR_SKY_CHECK_INTERVAL_TICKS;
@@ -52,11 +44,6 @@ public final class MekanismOptimizerConfig {
 
         builder.comment("Mekanism Optimizer General Settings").push("General Settings");
 
-        ENABLE_TRANSPORTER_CACHE = builder
-                .comment("Enable caching of transporter paths and destination lookups.")
-                .translation("mekanism_optimizer.config.enableTransporterCache")
-                .define("enableTransporterCache", true);
-
         ENABLE_FAST_POISSON_SAMPLER = builder
                 .comment("Enable O(1) fast Poisson distribution sampling to replace iterative loops.")
                 .translation("mekanism_optimizer.config.enableFastPoissonSampler")
@@ -71,26 +58,6 @@ public final class MekanismOptimizerConfig {
                 .comment("Enable caching of skylight checks for Solar Neutron Activator and solar machines.")
                 .translation("mekanism_optimizer.config.enableSolarLightCache")
                 .define("enableSolarLightCache", true);
-
-        ENABLE_PUMP_BACKOFF = builder
-                .comment("Enable fast-path liquid fluid checks for Electric Pumps.")
-                .translation("mekanism_optimizer.config.enableElectricPumpOptimization")
-                .define("enableElectricPumpOptimization", true);
-
-        ENABLE_NETWORK_EMIT_OPTIMIZATION = builder
-                .comment("Enable dynamic emit cooldown for empty or stalled energy/chemical/fluid networks.")
-                .translation("mekanism_optimizer.config.enableDynamicNetworkCooldown")
-                .define("enableDynamicNetworkCooldown", true);
-
-        ENABLE_FAST_SIMULATE = builder
-                .comment("Enable fast simulated item insertion without full capability recreation.")
-                .translation("mekanism_optimizer.config.enableFastSimulate")
-                .define("enableFastSimulate", true);
-
-        ENABLE_PACKET_COALESCING = builder
-                .comment("Enable coalescing of tile entity update packets to reduce network bandwidth and client lag (MekDefender).")
-                .translation("mekanism_optimizer.config.enablePacketCoalescing")
-                .define("enablePacketCoalescing", true);
 
         ENABLE_OWNER_CHUNKLOAD_GATING = builder
                 .comment("Enable sleeping anchor upgrades and dimensional stabilizers when the owner is offline (MekDefender).")
@@ -157,11 +124,6 @@ public final class MekanismOptimizerConfig {
                 .translation("mekanism_optimizer.config.enableWindGeneratorAngleThrottling")
                 .define("enableWindGeneratorAngleThrottling", true);
 
-        ENABLE_TRANSMITTER_RENDER_OPTIMIZATION = builder
-                .comment("Enable zero-allocation model caching for pipes, cables, and tubes to eliminate stream/string allocations per frame.")
-                .translation("mekanism_optimizer.config.enableTransmitterRenderOptimization")
-                .define("enableTransmitterRenderOptimization", true);
-
         ENABLE_FLUID_TANK_RENDER_OPTIMIZATION = builder
                 .comment("Enable fluid tank rendering cache and lookup optimizations.")
                 .translation("mekanism_optimizer.config.enableFluidTankRenderOptimization")
@@ -177,19 +139,9 @@ public final class MekanismOptimizerConfig {
                 .translation("mekanism_optimizer.config.enableDedicatedLogFile")
                 .define("enableDedicatedLogFile", true);
 
-        ITEM_EJECT_TICK_DELAY = builder
-                .comment("Tick delay between item auto-ejection cycles (0 = eject every tick, vanilla Mekanism default is 10).")
-                .translation("mekanism_optimizer.config.itemEjectTickDelay")
-                .defineInRange("itemEjectTickDelay", 0, 0, 20);
-
         builder.pop();
 
         builder.comment("Advanced Tuning").push("Advanced Tuning");
-
-        MAX_BACKOFF_TICKS = builder
-                .comment("Maximum ticks to back off when an ejection target is continuously blocked.")
-                .translation("mekanism_optimizer.config.maxBackoffTicks")
-                .defineInRange("maxBackoffTicks", 20, 1, 100);
 
         SOLAR_LIGHT_CACHE_TTL_TICKS = builder
                 .comment("Time-to-live in ticks for cached skylight visibility.")

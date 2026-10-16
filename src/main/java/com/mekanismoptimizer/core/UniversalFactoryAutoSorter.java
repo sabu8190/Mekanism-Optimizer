@@ -31,7 +31,7 @@ public final class UniversalFactoryAutoSorter {
      * @return true if balancing was processed
      */
     public static boolean sortMekanismFactory(TileEntityFactory<?> factory) {
-        if (!factory.isSorting()) {
+        if (!MekanismOptimizerConfig.ENABLE_FACTORY_AUTO_SORT_OPTIMIZATION.get() || !factory.isSorting()) {
             return false;
         }
 
@@ -53,7 +53,7 @@ public final class UniversalFactoryAutoSorter {
      * @return true if balancing was processed
      */
     public static boolean sortAMEFactory(Object ameFactory) {
-        if (ameFactory == null) {
+        if (ameFactory == null || !MekanismOptimizerConfig.ENABLE_FACTORY_AUTO_SORT_OPTIMIZATION.get()) {
             return false;
         }
 
@@ -146,6 +146,7 @@ public final class UniversalFactoryAutoSorter {
             }
         }
 
+        MekanismOptimizerLogger.recordFactorySortOptimized();
         return true;
     }
 

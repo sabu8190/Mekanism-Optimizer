@@ -12,34 +12,35 @@ public class AdaptiveBackoffTest {
 
     @BeforeEach
     public void setup() {
-        AdaptiveBackoffManager.recordSuccess(testKey);
+        AdaptiveBackoffManager.clear();
     }
 
     @Test
     public void testInitialExecution() {
-        assertTrue(AdaptiveBackoffManager.shouldRun(testKey, 100L), "Should run initially on tick 100");
+        assertFalse(AdaptiveBackoffManager.shouldBackoff(testKey), "Should not back off initially");
     }
 
     @Test
-    public void testBackoffAndWakeUp() {
-        long currentTick = 100L;
-        assertTrue(AdaptiveBackoffManager.shouldRun(testKey, currentTick));
+    public void testBackoffAndRecovery() {
+        assertFalse(AdaptiveBackoffManager.shouldBackoff(testKey));
 
-        // First failure: backoff = 2 ticks -> next tick = 102
-        AdaptiveBackoffManager.recordFailure(testKey, currentTick);
-        assertFalse(AdaptiveBackoffManager.shouldRun(testKey, 101L), "Should not run on tick 101");
-        assertTrue(AdaptiveBackoffManager.shouldRun(testKey, 102L), "Should run on tick 102");
+        // First failure: backs off for at least 2 ticks
+        AdaptiveBackoffManager.recordFailure(testKey);
+        assertTrue(AdaptiveBackoffManager.shouldBackoff(testKey), "Should back off immediately after failure");
 
-        // Second failure at 102: backoff = 4 ticks -> next tick = 106
-        AdaptiveBackoffManager.recordFailure(testKey, 102L);
-        assertFalse(AdaptiveBackoffManager.shouldRun(testKey, 103L));
-        assertFalse(AdaptiveBackoffManager.shouldRun(testKey, 105L));
-        assertTrue(AdaptiveBackoffManager.shouldRun(testKey, 106L));
+        // Advance 1 tick -> still backed off
+        AdaptiveBackoffManager.onServerTick();
+        assertTrue(AdaptiveBackoffManager.shouldBackoff(testKey), "Should remain backed off on tick +1");
 
-        // WakeUp resets backoff immediately
-        AdaptiveBackoffManager.recordFailure(testKey, 106L);
-        assertFalse(AdaptiveBackoffManager.shouldRun(testKey, 107L));
-        AdaptiveBackoffManager.wakeUp(testKey);
-        assertTrue(AdaptiveBackoffManager.shouldRun(testKey, 107L), "Should run immediately after wake up");
+        // Advance 2 ticks -> backoff expires
+        AdaptiveBackoffManager.onServerTick();
+        AdaptiveBackoffManager.onServerTick();
+        assertFalse(AdaptiveBackoffManager.shouldBackoff(testKey), "Should run after backoff duration expires");
+
+        // Record success clears backoff
+        AdaptiveBackoffManager.recordFailure(testKey);
+        assertTrue(AdaptiveBackoffManager.shouldBackoff(testKey));
+        AdaptiveBackoffManager.recordSuccess(testKey);
+        assertFalse(AdaptiveBackoffManager.shouldBackoff(testKey), "Should run immediately after recordSuccess");
     }
 }
